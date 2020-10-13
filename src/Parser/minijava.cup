@@ -25,6 +25,9 @@ terminal LPAREN, RPAREN, SEMICOLON;
 /* identifiers */
 terminal String IDENTIFIER;
 
+/* digits */
+terminal Integer DIGIT; 
+
 
 /* Nonterminals (constructed by parser): */
 

@@ -95,6 +95,8 @@ import Parser.sym;
      ComplexSymbol cs = (ComplexSymbol)s; 
      if (cs.sym == sym.IDENTIFIER) {
        return "ID(" + (String)cs.value + ")";
+     } else if (cs.sym == sym.DIGIT) {
+       return "DIGIT(" + (String)cs.value + ")";
      } else if (cs.sym == sym.error) {
        return "<UNEXPECTED(" + (String)cs.value + ")>";
      } else {
@@ -130,6 +132,10 @@ white = {eol}|[ \t]
   return symbol(sym.IDENTIFIER, yytext());
 }
 
+/* digits */
+{digit} {
+  return symbol(sym.DIGIT, yytext()); 
+}
 
 /* whitespace */
 {white}+ { /* ignore whitespace */ }
