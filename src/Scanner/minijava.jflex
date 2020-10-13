@@ -2,6 +2,7 @@
  * JFlex specification for lexical analysis of a simple demo language.
  * Change this into the scanner for your implementation of MiniJava.
  *
+ *
  * CSE 401/M501/P501 19au, 20sp, 20au
  */
 
