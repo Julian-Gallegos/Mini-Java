@@ -97,6 +97,16 @@ import Parser.sym;
        return "ID(" + (String)cs.value + ")";
      } else if (cs.sym == sym.DIGIT) {
        return "DIGIT(" + (String)cs.value + ")";
+     } else if (cs.sym == sym.BECOMES) {
+       return "BECOMES";
+     } else if (cs.sym == sym.PLUS) {
+       return "PLUS";
+     } else if (cs.sym == sym.LPAREN) {
+       return "LPAREN";
+     } else if (cs.sym == sym.RPAREN) {
+       return "RPAREN";
+     } else if (cs.sym == sym.SEMICOLON) {
+       return "SEMICOLON";
      } else if (cs.sym == sym.error) {
        return "<UNEXPECTED(" + (String)cs.value + ")>";
      } else {
