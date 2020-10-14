@@ -126,16 +126,41 @@ white = {eol}|[ \t]
 /* Token definitions */
 
 /* reserved words (first so that they take precedence over identifiers) */
-"display" { return symbol(sym.DISPLAY); }
+// "display" { return symbol(sym.DISPLAY); }
+"return" { return symbol(sys.RETURN); }
+"if" { return symbol(sym.IF); }
+"else" { return symbol(sym.ELSE); }
+"while" { return symbol(sym.WHILE); }
+"System.out.println" { return symbol(sym.SYSOUTPRINTLN); }
+"int" { return symbol(sym.INT); }
+"boolean" { return symbol(sym.BOOL); }
+"true" { return symbol(sym.TRUE); }
+"false" { return symbol(sym.FALSE); }
+"this" { return symbol(sym.THIS); }
+"new" { return symbol(sym.NEW); }
+"public" { return symbol(sym.PUBLIC); }
+"static" { return symbol(sym.STATIC); }
+"void" { return symbol(sym.VOID); }
+"main" { return symbol(sym.MAIN); }
+"class" { return symbol(sym.CLASS); }
+"extends" { return symbol(sym.EXTENDS); }
+
 
 /* operators */
 "+" { return symbol(sym.PLUS); }
 "=" { return symbol(sym.BECOMES); }
+"&&" { return symbol(sym.AND); }
+"<" { return symbol(sym.LTHAN); }
+"-" { return symbol(sym.MINUS); }
+"*" { return symbol(sym.TIMES); }
+"[" { return symbol(sym.LBRACKET); }
+"]" { return symbol(sym.RBRACKET); }
 
 /* delimiters */
 "(" { return symbol(sym.LPAREN); }
 ")" { return symbol(sym.RPAREN); }
 ";" { return symbol(sym.SEMICOLON); }
+"!" { return symbol(sym.EXCLAMATION); }
 
 /* identifiers */
 {letter} ({letter}|{digit}|_)* {
