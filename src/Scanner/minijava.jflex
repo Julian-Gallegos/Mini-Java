@@ -226,10 +226,10 @@ multilinehelper = [^*]|"*"+[^*/]
 "<" { return symbol(sym.LTHAN); }
 "-" { return symbol(sym.MINUS); }
 "*" { return symbol(sym.TIMES); }
-"[" { return symbol(sym.LBRACKET); }
-"]" { return symbol(sym.RBRACKET); }
 "," { return symbol(sym.COMMA); }
 "." { return symbol(sym.DOT); }
+"!" { return symbol(sym.NOT); }
+
 
 /* delimiters */
 "(" { return symbol(sym.LPAREN); }
@@ -237,7 +237,8 @@ multilinehelper = [^*]|"*"+[^*/]
 "{" { return symbol(sym.LBRACE); }
 "}" { return symbol(sym.RBRACE); }
 ";" { return symbol(sym.SEMICOLON); }
-"!" { return symbol(sym.NOT); }
+"[" { return symbol(sym.LBRACKET); }
+"]" { return symbol(sym.RBRACKET); }
 
 /* identifiers */
 {letter} ({letter}|{digit}|_)* {
