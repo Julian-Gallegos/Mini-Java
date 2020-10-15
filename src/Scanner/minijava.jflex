@@ -120,6 +120,9 @@ letter = [a-zA-Z]
 digit = [0-9]
 eol = [\r\n]
 white = {eol}|[ \t]
+norn = [a-m]|[o-q]|[s-z]|[A-Z]
+nofwdslashstar = {letter}|{digit}|_|\| |{eol}
+
 
 %%
 
@@ -174,6 +177,12 @@ white = {eol}|[ \t]
 
 /* whitespace */
 {white}+ { /* ignore whitespace */ }
+
+/* single line comment */
+"//" (({letter}|{digit}|_|"/"| )*|\+({norn}|_| )*){eol}? { /* ignore single line comments */ }
+
+/* multi line comment */
+"/*" (({letter}|{digit}|_|/|\| |{eol})*|"*"+({nofwdslashstar})*)"*/" { /* ignore multi line comments */ }
 
 /* lexical errors (last so other matches take precedence) */
 . {

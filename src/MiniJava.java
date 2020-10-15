@@ -3,13 +3,14 @@ import Parser.sym;
 import java_cup.runtime.Symbol;
 import java_cup.runtime.ComplexSymbolFactory;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 
 public class MiniJava {
     public static void main(String[] args) {
         try {
             // create a scanner on the input file
             ComplexSymbolFactory sf = new ComplexSymbolFactory();
-            String filename = args[2]; 
+            InputStream filename = new ByteArrayInputStream(args[2].getBytes(StandardCharsets.UTF_8));//(InputStream) args[2];
             Reader in = new BufferedReader(new InputStreamReader(filename));
             scanner s = new scanner(in, sf);
             Symbol t = s.next_token();
