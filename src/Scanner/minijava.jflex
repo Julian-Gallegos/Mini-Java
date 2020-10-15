@@ -101,6 +101,10 @@ import Parser.sym;
        return "BECOMES";
      } else if (cs.sym == sym.PLUS) {
        return "PLUS";
+     } else if (cs.sym == sym.MINUS) {
+       return "MINUS";
+     } else if (cs.sym == sym.RETURN) {
+       return "RETURN";
      } else if (cs.sym == sym.LPAREN) {
        return "LPAREN";
      } else if (cs.sym == sym.RPAREN) {
@@ -184,7 +188,7 @@ everythingButEOL = [^\r\n]
 
 /* multi line comment */
 /* "/*" (({letter}|{digit}|_|/|\| |{eol})*|"*"+({nofwdslashstar})*)"*/" { /* ignore multi line comments */ } */
-"/*"{([^*/])*}"*/"
+"/*" [^*/]*"*/" { /* ignore multi line comments */ }
 
 /* lexical errors (last so other matches take precedence) */
 . {
