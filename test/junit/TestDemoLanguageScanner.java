@@ -63,4 +63,24 @@ public class TestDemoLanguageScanner {
     public void testSimpleArithmetic() {
         runScannerTestCase("SimpleArithmetic");
     }
+
+    @Test
+    public void testOneLineComments() {
+        runScannerTestCase("OneLineComments");
+    }
+
+    @Test
+    public void testMultipleOneLineComments() {
+        runScannerTestCase("MultipleOneLineComments");
+    }
+
+    @Test
+    public void testMultiLineComments() {
+        runScannerTestCase("MultiLineComments");
+    }
+
+    @Test
+    public void testMultiLineCommentsNested() {
+        runScannerTestCase("MultiLineCommentsNested");
+    }
 }
