@@ -122,7 +122,7 @@ eol = [\r\n]
 white = {eol}|[ \t]
 norn = [a-m]|[o-q]|[s-z]|[A-Z]
 nofwdslashstar = {letter}|{digit}|_|\| |{eol}
-
+everythingButEOL = [^\r\n]
 
 %%
 
@@ -179,10 +179,12 @@ nofwdslashstar = {letter}|{digit}|_|\| |{eol}
 {white}+ { /* ignore whitespace */ }
 
 /* single line comment */
-"//" (({letter}|{digit}|_|"/"| )*|\+({norn}|_| )*){eol}? { /* ignore single line comments */ }
+/* "//" (({letter}|{digit}|_|"/"| )*|\+({norn}|_| )*){eol}? { /* ignore single line comments */ } */
+"//" {everythingButEOL}*{eol}? { /* ignore single line comments */ }
 
 /* multi line comment */
-"/*" (({letter}|{digit}|_|/|\| |{eol})*|"*"+({nofwdslashstar})*)"*/" { /* ignore multi line comments */ }
+/* "/*" (({letter}|{digit}|_|/|\| |{eol})*|"*"+({nofwdslashstar})*)"*/" { /* ignore multi line comments */ } */
+"/*"{([^*/])*}"*/"
 
 /* lexical errors (last so other matches take precedence) */
 . {
