@@ -125,6 +125,10 @@ import Parser.sym;
        return "LBRACKET";
      } else if (cs.sym == sym.RBRACKET) { 
        return "RBRACKET";
+     } else if (cs.sym == sym.LBRACE) {
+       return "LBRACE";
+     } else if (cs.sym == sym.RBRACE) {
+       return "RBRACE";
      } else if (cs.sym == sym.NOT) {
        return "NOT";
      } else if (cs.sym == sym.IF) { 
@@ -227,6 +231,8 @@ everythingButEOL = [^\r\n]
 /* delimiters */
 "(" { return symbol(sym.LPAREN); }
 ")" { return symbol(sym.RPAREN); }
+"{" { return symbol(sym.LBRACE); }
+"}" { return symbol(sym.RBRACE); }
 ";" { return symbol(sym.SEMICOLON); }
 "!" { return symbol(sym.NOT); }
 
@@ -236,7 +242,7 @@ everythingButEOL = [^\r\n]
 }
 
 /* digits */
-{digit} {
+{digit}+ {
   return symbol(sym.DIGIT, yytext()); 
 }
 

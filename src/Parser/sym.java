@@ -15,14 +15,14 @@ public class sym {
   public static final int MINUS = 26;
   public static final int STATIC = 16;
   public static final int RPAREN = 31;
-  public static final int NOT = 35;
+  public static final int NOT = 37;
   public static final int SEMICOLON = 32;
   public static final int AND = 24;
   public static final int LTHAN = 25;
   public static final int BOOL = 10;
   public static final int COMMA = 28;
   public static final int CLASS = 19;
-  public static final int DIGIT = 37;
+  public static final int DIGIT = 39;
   public static final int PLUS = 22;
   public static final int MAIN = 18;
   public static final int IF = 4;
@@ -37,15 +37,17 @@ public class sym {
   public static final int BECOMES = 23;
   public static final int VOID = 17;
   public static final int TIMES = 27;
+  public static final int LBRACE = 35;
   public static final int ELSE = 5;
   public static final int WHILE = 6;
   public static final int SYSOUTPRINTLN = 7;
   public static final int PUBLIC = 15;
+  public static final int RBRACE = 36;
   public static final int EXTENDS = 20;
   public static final int STRING = 8;
   public static final int FALSE = 12;
   public static final int LENGTH = 21;
-  public static final int IDENTIFIER = 36;
+  public static final int IDENTIFIER = 38;
   public static final String[] terminalNames = new String[] {
   "EOF",
   "error",
@@ -82,6 +84,8 @@ public class sym {
   "SEMICOLON",
   "LBRACKET",
   "RBRACKET",
+  "LBRACE",
+  "RBRACE",
   "NOT",
   "IDENTIFIER",
   "DIGIT"
