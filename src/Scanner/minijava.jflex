@@ -109,8 +109,64 @@ import Parser.sym;
        return "LPAREN";
      } else if (cs.sym == sym.RPAREN) {
        return "RPAREN";
+     } else if (cs.sym == sym.LBRACKET) { 
+       return "LBRACKET";
+     } else if (cs.sym == sym.RBRACKET) {
+       return "RBRACKET";
+     } else if (cs.sym == sym.AND) {
+       return "AND";
+     } else if (cs.sym == sym.LTHAN) {
+       return "LTHAN";
+     } else if (cs.sym == sym.TIMES) { 
+       return "TIMES";
+     } else if (cs.sym == sym.LBRACKET) {
+       return "LBRACKET";
+     } else if (cs.sym == sym.RBRACKET) { 
+       return "RBRACKET";
+     } else if (cs.sym == sym.NOT) {
+       return "NOT";
+     } else if (cs.sym == sym.IF) { 
+       return "IF";
+     } else if (cs.sym == sym.ELSE) {
+       return "ELSE";
+     } else if (cs.sym == sym.WHILE) {
+       return "WHILE";
+     } else if (cs.sym == sym.SYSOUTPRINTLN) {
+       return "SYSOUTPRINTLN";
+     } else if (cs.sym == sym.STRING) { 
+       return "STRING";
+     } else if (cs.sym == sym.INT) {
+       return "INT";
+     } else if (cs.sym == sym.BOOL) {
+       return "BOOL";
+     } else if (cs.sym == sym.TRUE) { 
+       return "TRUE"; 
+     } else if (cs.sym == sym.FALSE) {
+       return "FALSE";
+     } else if (cs.sym == sym.THIS) {
+       return "THIS";
+     } else if (cs.sym == sym.NEW) {
+       return "NEW";
+     } else if (cs.sym == sym.PUBLIC) {
+       return "PUBLIC";
+     } else if (cs.sym == sym.STATIC) {
+       return "STATIC";
+     } else if (cs.sym == sym.VOID) {
+       return "VOID";
+     } else if (cs.sym == sym.MAIN) {
+       return "MAIN";
+     } else if (cs.sym == sym.CLASS) {
+       return "CLASS";
+     } else if (cs.sym == sym.EXTENDS) {
+       return "EXTENDS";
      } else if (cs.sym == sym.SEMICOLON) {
        return "SEMICOLON";
+     } else if (cs.sym == sym.COMMA) {
+       return "COMMA";
+     } else if (cs.sym == sym.DOT) {
+       return "DOT";
+     } else if (cs.sym == sym.LENGTH) {
+       return "LENGTH";
      } else if (cs.sym == sym.error) {
        return "<UNEXPECTED(" + (String)cs.value + ")>";
      } else {
@@ -151,6 +207,7 @@ everythingButEOL = [^\r\n]
 "main" { return symbol(sym.MAIN); }
 "class" { return symbol(sym.CLASS); }
 "extends" { return symbol(sym.EXTENDS); }
+"length" { return symbol(sym.LENGTH); }
 
 
 /* operators */
@@ -162,12 +219,14 @@ everythingButEOL = [^\r\n]
 "*" { return symbol(sym.TIMES); }
 "[" { return symbol(sym.LBRACKET); }
 "]" { return symbol(sym.RBRACKET); }
+"," { return symbol(sym.COMMA); }
+"." { return symbol(sym.DOT); }
 
 /* delimiters */
 "(" { return symbol(sym.LPAREN); }
 ")" { return symbol(sym.RPAREN); }
 ";" { return symbol(sym.SEMICOLON); }
-"!" { return symbol(sym.EXCLAMATION); }
+"!" { return symbol(sym.NOT); }
 
 /* identifiers */
 {letter} ({letter}|{digit}|_)* {
@@ -188,7 +247,7 @@ everythingButEOL = [^\r\n]
 
 /* multi line comment */
 /* "/*" (({letter}|{digit}|_|/|\| |{eol})*|"*"+({nofwdslashstar})*)"*/" { /* ignore multi line comments */ } */
-"/*" [^*/]*"*/" { /* ignore multi line comments */ }
+"/*" [^*/]* "*/" { /* ignore multi line comments */ }
 
 /* lexical errors (last so other matches take precedence) */
 . {
