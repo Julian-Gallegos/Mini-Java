@@ -1,7 +1,8 @@
 a = b + c;
-/*/*
+/*
+/*
 testing
-// display a;
+ display a;
 testing
-*/*/
+*/
 display a;
