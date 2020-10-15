@@ -14,7 +14,7 @@ import java_cup.runtime.*;
 /* Terminals (lexical tokens returned by the scanner): */
 
 /* reserved words */
-terminal DISPLAY;
+//terminal DISPLAY;
 terminal RETURN, IF, ELSE, WHILE, SYSOUTPRINTLN, STRING, INT, BOOL, TRUE, FALSE, THIS, NEW, PUBLIC, STATIC, VOID, MAIN, CLASS, EXTENDS, LENGTH; 
 
 /* operators */
@@ -66,10 +66,10 @@ AssignStatement ::= Identifier:id BECOMES Expression:expr SEMICOLON
 
 Identifier  ::= IDENTIFIER:id
                 {: RESULT = new Identifier(id, idxleft); :};
-
+/*
 DisplayStatement ::= DISPLAY:d Expression:expr SEMICOLON
                      {: RESULT = new Display(expr, dxleft); :};
-
+*/
 Expression    ::= IDENTIFIER:name
             {: RESULT = new IdentifierExp(name, namexleft); :}
         | Expression:arg1 PLUS Expression:arg2

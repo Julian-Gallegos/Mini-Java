@@ -34,10 +34,10 @@ public class parser extends java_cup.runtime.lr_parser {
   /** Production table. */
   protected static final short _production_table[][] = 
     unpackFromStrings(new String[] {
-    "\000\013\000\002\002\003\000\002\002\004\000\002\002" +
+    "\000\012\000\002\002\003\000\002\002\004\000\002\002" +
     "\004\000\002\003\003\000\002\003\003\000\002\004\006" +
-    "\000\002\007\003\000\002\005\005\000\002\006\003\000" +
-    "\002\006\005\000\002\006\005" });
+    "\000\002\007\003\000\002\006\003\000\002\006\005\000" +
+    "\002\006\005" });
 
   /** Access to production table. */
   public short[][] production_table() {return _production_table;}
@@ -45,21 +45,18 @@ public class parser extends java_cup.runtime.lr_parser {
   /** Parse-action table. */
   protected static final short[][] _action_table = 
     unpackFromStrings(new String[] {
-    "\000\025\000\006\004\010\050\011\001\002\000\010\002" +
-    "\027\004\010\050\011\001\002\000\010\002\ufffe\004\ufffe" +
-    "\050\ufffe\001\002\000\010\002\001\004\001\050\001\001" +
-    "\002\000\010\002\ufffd\004\ufffd\050\ufffd\001\002\000\006" +
-    "\040\016\050\015\001\002\000\004\031\ufffb\001\002\000" +
-    "\004\031\013\001\002\000\006\040\016\050\015\001\002" +
-    "\000\006\030\021\042\023\001\002\000\010\030\ufff9\041" +
-    "\ufff9\042\ufff9\001\002\000\006\040\016\050\015\001\002" +
-    "\000\006\030\021\041\020\001\002\000\010\030\ufff7\041" +
-    "\ufff7\042\ufff7\001\002\000\006\040\016\050\015\001\002" +
-    "\000\010\030\ufff8\041\ufff8\042\ufff8\001\002\000\010\002" +
-    "\ufffc\004\ufffc\050\ufffc\001\002\000\006\030\021\042\025" +
-    "\001\002\000\010\002\ufffa\004\ufffa\050\ufffa\001\002\000" +
-    "\010\002\uffff\004\uffff\050\uffff\001\002\000\004\002\000" +
-    "\001\002" });
+    "\000\022\000\004\047\010\001\002\000\006\002\024\047" +
+    "\010\001\002\000\006\002\ufffe\047\ufffe\001\002\000\006" +
+    "\002\001\047\001\001\002\000\006\002\ufffd\047\ufffd\001" +
+    "\002\000\004\030\ufffb\001\002\000\004\030\012\001\002" +
+    "\000\006\037\015\047\014\001\002\000\006\027\020\041" +
+    "\022\001\002\000\010\027\ufffa\040\ufffa\041\ufffa\001\002" +
+    "\000\006\037\015\047\014\001\002\000\006\027\020\040" +
+    "\017\001\002\000\010\027\ufff8\040\ufff8\041\ufff8\001\002" +
+    "\000\006\037\015\047\014\001\002\000\010\027\ufff9\040" +
+    "\ufff9\041\ufff9\001\002\000\006\002\ufffc\047\ufffc\001\002" +
+    "\000\006\002\uffff\047\uffff\001\002\000\004\002\000\001" +
+    "\002" });
 
   /** Access to parse-action table. */
   public short[][] action_table() {return _action_table;}
@@ -67,15 +64,14 @@ public class parser extends java_cup.runtime.lr_parser {
   /** <code>reduce_goto</code> table. */
   protected static final short[][] _reduce_table = 
     unpackFromStrings(new String[] {
-    "\000\025\000\014\002\003\003\005\004\004\005\006\007" +
-    "\011\001\001\000\012\003\025\004\004\005\006\007\011" +
+    "\000\022\000\014\002\003\003\005\004\004\005\006\007" +
+    "\010\001\001\000\012\003\022\004\004\005\006\007\010" +
     "\001\001\000\002\001\001\000\002\001\001\000\002\001" +
-    "\001\000\004\006\023\001\001\000\002\001\001\000\002" +
-    "\001\001\000\004\006\013\001\001\000\002\001\001\000" +
-    "\002\001\001\000\004\006\016\001\001\000\002\001\001" +
-    "\000\002\001\001\000\004\006\021\001\001\000\002\001" +
-    "\001\000\002\001\001\000\002\001\001\000\002\001\001" +
-    "\000\002\001\001\000\002\001\001" });
+    "\001\000\002\001\001\000\002\001\001\000\004\006\012" +
+    "\001\001\000\002\001\001\000\002\001\001\000\004\006" +
+    "\015\001\001\000\002\001\001\000\002\001\001\000\004" +
+    "\006\020\001\001\000\002\001\001\000\002\001\001\000" +
+    "\002\001\001\000\002\001\001" });
 
   /** Access to <code>reduce_goto</code> table. */
   public short[][] reduce_table() {return _reduce_table;}
@@ -232,22 +228,7 @@ class CUP$parser$actions {
           return CUP$parser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 7: // DisplayStatement ::= DISPLAY Expression SEMICOLON 
-            {
-              Display RESULT =null;
-		Location dxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$parser$stack.elementAt(CUP$parser$top-2)).xleft;
-		Location dxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$parser$stack.elementAt(CUP$parser$top-2)).xright;
-		Object d = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-2)).value;
-		Location exprxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).xleft;
-		Location exprxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).xright;
-		Exp expr = (Exp)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-1)).value;
-		 RESULT = new Display(expr, dxleft); 
-              CUP$parser$result = parser.getSymbolFactory().newSymbol("DisplayStatement",3, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
-            }
-          return CUP$parser$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 8: // Expression ::= IDENTIFIER 
+          case 7: // Expression ::= IDENTIFIER 
             {
               Exp RESULT =null;
 		Location namexleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$parser$stack.peek()).xleft;
@@ -259,7 +240,7 @@ class CUP$parser$actions {
           return CUP$parser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 9: // Expression ::= Expression PLUS Expression 
+          case 8: // Expression ::= Expression PLUS Expression 
             {
               Exp RESULT =null;
 		Location arg1xleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$parser$stack.elementAt(CUP$parser$top-2)).xleft;
@@ -274,7 +255,7 @@ class CUP$parser$actions {
           return CUP$parser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 10: // Expression ::= LPAREN Expression RPAREN 
+          case 9: // Expression ::= LPAREN Expression RPAREN 
             {
               Exp RESULT =null;
 		Location exprxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).xleft;

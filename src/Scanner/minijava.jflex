@@ -101,8 +101,10 @@ import Parser.sym;
        return "BECOMES";
      } else if (cs.sym == sym.PLUS) {
        return "PLUS";
+     /*
      } else if (cs.sym == sym.DISPLAY) {
        return "DISPLAY";
+     */
      } else if (cs.sym == sym.MINUS) {
        return "MINUS";
      } else if (cs.sym == sym.RETURN) {
@@ -195,7 +197,7 @@ everythingButEOL = [^\r\n]
 /* Token definitions */
 
 /* reserved words (first so that they take precedence over identifiers) */
-"display" { return symbol(sym.DISPLAY); }
+//"display" { return symbol(sym.DISPLAY); }
 "return" { return symbol(sym.RETURN); }
 "if" { return symbol(sym.IF); }
 "else" { return symbol(sym.ELSE); }

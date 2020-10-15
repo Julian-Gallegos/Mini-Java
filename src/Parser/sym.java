@@ -8,50 +8,48 @@ package Parser;
 /** CUP generated class containing symbol constants. */
 public class sym {
   /* terminals */
-  public static final int DISPLAY = 2;
-  public static final int LBRACKET = 33;
-  public static final int LPAREN = 30;
-  public static final int INT = 9;
-  public static final int MINUS = 26;
-  public static final int STATIC = 16;
-  public static final int RPAREN = 31;
-  public static final int NOT = 37;
-  public static final int SEMICOLON = 32;
-  public static final int AND = 24;
-  public static final int LTHAN = 25;
-  public static final int BOOL = 10;
-  public static final int COMMA = 28;
-  public static final int CLASS = 19;
-  public static final int DIGIT = 39;
-  public static final int PLUS = 22;
-  public static final int MAIN = 18;
-  public static final int IF = 4;
-  public static final int THIS = 13;
-  public static final int DOT = 29;
+  public static final int LBRACKET = 32;
+  public static final int LPAREN = 29;
+  public static final int INT = 8;
+  public static final int MINUS = 25;
+  public static final int STATIC = 15;
+  public static final int RPAREN = 30;
+  public static final int NOT = 36;
+  public static final int SEMICOLON = 31;
+  public static final int AND = 23;
+  public static final int LTHAN = 24;
+  public static final int BOOL = 9;
+  public static final int COMMA = 27;
+  public static final int CLASS = 18;
+  public static final int DIGIT = 38;
+  public static final int PLUS = 21;
+  public static final int MAIN = 17;
+  public static final int IF = 3;
+  public static final int THIS = 12;
+  public static final int DOT = 28;
   public static final int EOF = 0;
-  public static final int RETURN = 3;
-  public static final int RBRACKET = 34;
-  public static final int TRUE = 11;
-  public static final int NEW = 14;
+  public static final int RETURN = 2;
+  public static final int RBRACKET = 33;
+  public static final int TRUE = 10;
+  public static final int NEW = 13;
   public static final int error = 1;
-  public static final int BECOMES = 23;
-  public static final int VOID = 17;
-  public static final int TIMES = 27;
-  public static final int LBRACE = 35;
-  public static final int ELSE = 5;
-  public static final int WHILE = 6;
-  public static final int SYSOUTPRINTLN = 7;
-  public static final int PUBLIC = 15;
-  public static final int RBRACE = 36;
-  public static final int EXTENDS = 20;
-  public static final int STRING = 8;
-  public static final int FALSE = 12;
-  public static final int LENGTH = 21;
-  public static final int IDENTIFIER = 38;
+  public static final int BECOMES = 22;
+  public static final int VOID = 16;
+  public static final int TIMES = 26;
+  public static final int LBRACE = 34;
+  public static final int ELSE = 4;
+  public static final int WHILE = 5;
+  public static final int SYSOUTPRINTLN = 6;
+  public static final int PUBLIC = 14;
+  public static final int RBRACE = 35;
+  public static final int EXTENDS = 19;
+  public static final int STRING = 7;
+  public static final int FALSE = 11;
+  public static final int LENGTH = 20;
+  public static final int IDENTIFIER = 37;
   public static final String[] terminalNames = new String[] {
   "EOF",
   "error",
-  "DISPLAY",
   "RETURN",
   "IF",
   "ELSE",
