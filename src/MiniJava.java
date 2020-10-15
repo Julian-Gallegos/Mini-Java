@@ -3,7 +3,6 @@ import Parser.sym;
 import java_cup.runtime.Symbol;
 import java_cup.runtime.ComplexSymbolFactory;
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 
 public class MiniJava {
     public static void main(String[] args) {
@@ -11,8 +10,9 @@ public class MiniJava {
             // create a scanner on the input file
             ComplexSymbolFactory sf = new ComplexSymbolFactory();
             System.out.println(args[1]);
-            InputStream filename = new ByteArrayInputStream(args[1].getBytes(StandardCharsets.UTF_8));//(InputStream) args[2];
-            Reader in = new BufferedReader(new InputStreamReader(filename));
+            File filePath = new File(args[1]); 
+            InputStream inputStream = new FileInputStream(filePath); 
+            Reader in = new BufferedReader(new InputStreamReader(inputStream));
             scanner s = new scanner(in, sf);
             Symbol t = s.next_token();
             while (t.sym != sym.EOF) { 
