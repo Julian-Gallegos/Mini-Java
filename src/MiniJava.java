@@ -9,7 +9,6 @@ public class MiniJava {
         try {
             // create a scanner on the input file
             ComplexSymbolFactory sf = new ComplexSymbolFactory();
-            System.out.println(args[1]);
             File filePath = new File(args[1]); 
             InputStream inputStream = new FileInputStream(filePath); 
             Reader in = new BufferedReader(new InputStreamReader(inputStream));

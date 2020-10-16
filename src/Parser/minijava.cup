@@ -15,13 +15,16 @@ import java_cup.runtime.*;
 
 /* reserved words */
 //terminal DISPLAY;
-terminal RETURN, IF, ELSE, WHILE, SYSOUTPRINTLN, STRING, INT, BOOL, TRUE, FALSE, THIS, NEW, PUBLIC, STATIC, VOID, MAIN, CLASS, EXTENDS, LENGTH; 
+terminal RETURN, IF, ELSE, WHILE, STDOUT, STRING, INT, BOOL, TRUE, FALSE, THIS, NEW, PUBLIC, STATIC, VOID, MAIN, CLASS, EXTENDS, LENGTH;
 
 /* operators */
 terminal PLUS, BECOMES, AND, LTHAN, MINUS, TIMES, COMMA, DOT, NOT;
 
 /* delimiters */
 terminal LPAREN, RPAREN, SEMICOLON, LBRACKET, RBRACKET, LBRACE, RBRACE;
+
+/* strings */
+terminal String TEXT;
 
 /* identifiers */
 terminal String IDENTIFIER;

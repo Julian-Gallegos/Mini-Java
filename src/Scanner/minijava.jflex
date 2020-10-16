@@ -139,8 +139,8 @@ import Parser.sym;
        return "ELSE";
      } else if (cs.sym == sym.WHILE) {
        return "WHILE";
-     } else if (cs.sym == sym.SYSOUTPRINTLN) {
-       return "SYSOUTPRINTLN";
+     } else if (cs.sym == sym.STDOUT) {
+       return "STDOUT";
      } else if (cs.sym == sym.STRING) { 
        return "STRING";
      } else if (cs.sym == sym.INT) {
@@ -175,6 +175,8 @@ import Parser.sym;
        return "DOT";
      } else if (cs.sym == sym.LENGTH) {
        return "LENGTH";
+     } else if (cs.sym == sym.TEXT) {
+       return "TEXT(" + (String)cs.value + ")";
      } else if (cs.sym == sym.error) {
        return "<UNEXPECTED(" + (String)cs.value + ")>";
      } else {
@@ -203,7 +205,7 @@ multilinehelper = [^*]|"*"+[^*/]
 "if" { return symbol(sym.IF); }
 "else" { return symbol(sym.ELSE); }
 "while" { return symbol(sym.WHILE); }
-"System.out.println" { return symbol(sym.SYSOUTPRINTLN); }
+"System.out.println" { return symbol(sym.STDOUT); }
 "int" { return symbol(sym.INT); }
 "boolean" { return symbol(sym.BOOL); }
 "true" { return symbol(sym.TRUE); }
@@ -243,6 +245,11 @@ multilinehelper = [^*]|"*"+[^*/]
 /* identifiers */
 {letter} ({letter}|{digit}|_)* {
   return symbol(sym.IDENTIFIER, yytext());
+}
+
+/* quotes */
+"\"" [^\"]* "\"" {
+  return symbol(sym.TEXT, yytext());
 }
 
 /* digits */
