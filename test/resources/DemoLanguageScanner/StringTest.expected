@@ -1,1 +1,1 @@
-ID(a) BECOMES TEXT( 'Four score and seven years ago' ) SEMICOLON ID(b) BECOMES TEXT( 'our fathers brought forth upon this continent, a new nation' ) SEMICOLON SYSOUTPRINTLN LPAREN ID(a) PLUS ID(B) RPAREN SEMICOLON
+ID(a) BECOMES TEXT(" 'Four score and seven years ago' ") SEMICOLON ID(b) BECOMES TEXT(" 'our fathers brought forth upon this continent, a new nation' ") SEMICOLON STDOUT LPAREN ID(a) PLUS ID(b) RPAREN SEMICOLON

@@ -83,4 +83,19 @@ public class TestDemoLanguageScanner {
     public void testMultiLineCommentsNested() {
         runScannerTestCase("MultiLineCommentsNested");
     }
+
+    @Test
+    public void stringTest() {
+        runScannerTestCase("StringTest");
+    }
+
+    @Test
+    public void testRobust() {
+        runScannerTestCase("TestRobust");
+    }
+
+    @Test
+    public void error() {
+        runScannerTestCase("Error");
+    }
 }
