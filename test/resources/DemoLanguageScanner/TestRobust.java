@@ -14,7 +14,7 @@ public class Hello {
         for (int i = 0; i < people.length; i++) {
             Person p = people[i];
             int j = p.getRepeat() * 2; 
-            System.out.println(p.getName() + " says hello!");
+            System.out.println(p.getName() + "  hello!");
             while (j != 0) {
                 if (p.isEmployed() && true) {
                     System.out.println("Where's my hazard pay!");
