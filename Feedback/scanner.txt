@@ -1,0 +1,5 @@
+CSE 401/M501 Project I - Scanner
+
+The scanner does not always return a nonzero exit status after reporting unrecognized input text (i.e., lexical errors). (-1)
+
+Total: 39/40
