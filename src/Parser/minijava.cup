@@ -40,7 +40,6 @@ terminal Integer DIGIT;
 nonterminal List<Statement> Program;
 nonterminal Statement Statement;
 nonterminal Assign AssignStatement;
-nonterminal Display DisplayStatement;
 nonterminal Exp Expression;
 nonterminal Identifier Identifier;
 
@@ -51,6 +50,8 @@ precedence left PLUS;
 
 
 /* Productions: */
+
+Goal ::= MainClass:m LP
 
 Program ::= Statement:s
             {: List<Statement> p = new LinkedList<Statement>();
@@ -73,7 +74,11 @@ Identifier  ::= IDENTIFIER:id
 DisplayStatement ::= DISPLAY:d Expression:expr SEMICOLON
                      {: RESULT = new Display(expr, dxleft); :};
 */
-Expression    ::= IDENTIFIER:name
+Expression    ::= Expression:arg1 AND Expression:arg2
+            {: RESULT = new And(arg1, arg2, arg1xleft); :}
+        | Expression:arg1 LTHAN Expression:arg2
+            {: RESULT = new LessThan(arg1, arg2, arg1xleft); :}
+        | IDENTIFIER:name
             {: RESULT = new IdentifierExp(name, namexleft); :}
         | Expression:arg1 PLUS Expression:arg2
             {: RESULT = new Plus(arg1, arg2, arg1xleft); :}
