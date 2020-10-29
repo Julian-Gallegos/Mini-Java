@@ -42,6 +42,14 @@ nonterminal Statement Statement;
 nonterminal Assign AssignStatement;
 nonterminal Exp Expression;
 nonterminal Identifier Identifier;
+nonterminal Type Type; 
+nonterminal MainClass MainClass; 
+nonterminal ClassDecl ClassDeclaration;
+nonterminal VarDecl VarDeclaration;
+nonterminal MethodDecl MethodDeclaration;
+nonterminal Program Goal;
+nonterminal ClassDeclList ClassDeclarationList;
+nonterminal VarDeclList VarDeclarationList; 
 
 
 /* Precedence declarations: */
@@ -51,7 +59,19 @@ precedence left PLUS;
 
 /* Productions: */
 
-Goal ::= MainClass:m LP
+Goal ::= MainClass:m ClassDeclarationList:cdl 
+    {: RESULT = new Program(m, cdl, mleft); :}
+
+
+MainClass ::= CLASS:c Identifier:id1 LBRACE PUBLIC STATIC VOID MAIN LPAREN STRING LBRACKET RBRACKET Identifier:id2 RPAREN LBRACE Statement:statement RBRACE RBRACE
+    {: RESULT = new MainClass(id1, id2, statement, cleft); :}
+
+ClassDeclaration ::= CLASS Identifier:id LBRACE
+
+VarDeclaration ::= Type:t Identifier:id SEMICOLON
+    {: RESULT = new VarDecl(t, id, tleft); :}
+
+MethodDeclaration ::= ... 
 
 Program ::= Statement:s
             {: List<Statement> p = new LinkedList<Statement>();
@@ -60,13 +80,38 @@ Program ::= Statement:s
         | Program:p Statement:s
             {: p.add(s); RESULT = p; :};
 
-Statement   ::= AssignStatement:s
+Type ::= INT:integer LBRACKET RBRACKET 
+    {: RESULT = new IntArrayType(integerleft); :}
+    | BOOL:boolean 
+    {: RESULT = new BooleanType(booleanleft); :}
+    | INT:integer 
+    {: RESULT = new IntegerType(integerleft); :}
+    | Identifier:id 
+    {: RESULT = new IdentifierType(id.toString(), idleft); :}
+
+Statement   ::= LBRACE ..statement*.. RBRACE 
+                {: RESULT = new ArrayLength(arg1, arg1xleft); :}
+            | IF LPAREN Expression:expr RPAREN Statement:statement1 ELSE Statement:statement2
+                {: RESULT = new If(expr, statement1, statement2, statement1xleft); :}
+            | WHILE LPAREN Expression:expr RPAREN Statement:statement
+                {: RESULT = new While(expr, statement, statement1xleft); :}
+            | STDOUT LPAREN Expression:expr RPAREN SEMICOLON
+                {: RESULT = new Print(expr, exprxleft); :}
+            | Identifier:id BECOMES Expression:expr SEMICOLON
+                {: RESULT = new Assign(id, expr, idxleft); :};
+            | Identifier:id LBRACKET Expression:expr1 RBRACKET BECOMES Expression:expr2 SEMICOLON
+                {: RESULT = new ArrayAssign(id, expr1, expr2, idxleft); :};
+            /*
+            AssignStatement:s
                 {: RESULT = s; :}
             | DisplayStatement:s
                 {: RESULT = s; :};
+            */
 
+/*
 AssignStatement ::= Identifier:id BECOMES Expression:expr SEMICOLON
                     {: RESULT = new Assign(id, expr, idxleft); :};
+*/
 
 Identifier  ::= IDENTIFIER:id
                 {: RESULT = new Identifier(id, idxleft); :};
@@ -78,9 +123,33 @@ Expression    ::= Expression:arg1 AND Expression:arg2
             {: RESULT = new And(arg1, arg2, arg1xleft); :}
         | Expression:arg1 LTHAN Expression:arg2
             {: RESULT = new LessThan(arg1, arg2, arg1xleft); :}
-        | IDENTIFIER:name
-            {: RESULT = new IdentifierExp(name, namexleft); :}
         | Expression:arg1 PLUS Expression:arg2
             {: RESULT = new Plus(arg1, arg2, arg1xleft); :}
+        | Expression:arg1 MINUS Expression:arg2 
+            {: RESULT = new Minus(arg1, arg2, arg1xleft); :}
+        | Expression:arg1 TIMES Expression:arg2
+            {: RESULT = new Times(arg1, arg2, arg1xleft); :}
+        | Expression:arg1 LBRACKET Expression:arg2 RBRACKET
+            {: RESULT = new ArrayLookup(arg1, arg2, arg1xleft); :}
+        | Expression:arg1 DOT LENGTH 
+            {: RESULT = new ArrayLength(arg1, arg1xleft); :}
+        | Expression:expr1 DOT Identifier:id LPAREN ..something.. RPAREN
+            {: RESULT = new Call(expr1, id, ..., expr1left); :}
+        | DIGIT:arg
+            {: RESULT = new IntegerLiteral(arg, argleft); :}
+        | TRUE:arg
+            {: RESULT = new True(argleft); :}
+        | FALSE:arg 
+            {: RESULT = new False(argleft); :}
+        | IDENTIFIER:name
+            {: RESULT = new IdentifierExp(name, namexleft); :}
+        | THIS:arg 
+            {: RESULT = new This(argleft); :}
+        | NEW INT LBRACKET Expression:expr RBRACKET 
+            {: RESULT = new NewArray(expr, exprleft); :}
+        | NEW IDENTIFIER:arg LPAREN RPAREN 
+            {: RESULT = new NewObject(arg, argleft); :}
+        | NOT Expression:expr 
+            {: RESULT = new Not(expr, exprleft); :}
         | LPAREN Expression:expr RPAREN
             {: RESULT = expr; :};

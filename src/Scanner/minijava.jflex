@@ -194,6 +194,7 @@ norn = [a-m]|[o-q]|[s-z]|[A-Z]
 nofwdslashstar = {letter}|{digit}|_|\| |{eol}
 everythingButEOL = [^\r\n]
 multilinehelper = [^*]|"*"+[^*/]
+comma = "\""
 
 %%
 
@@ -248,7 +249,7 @@ multilinehelper = [^*]|"*"+[^*/]
 }
 
 /* quotes */
-"\"" [^\"]* "\"" {
+comma [^\"]* comma {
   return symbol(sym.TEXT, yytext());
 }
 
