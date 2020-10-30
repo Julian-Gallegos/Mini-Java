@@ -85,9 +85,7 @@ ClassDeclaration ::= CLASS Identifier:id LBRACE VarDeclarationList:vdl MethodDec
 VarDeclaration ::= Type:t Identifier:id SEMICOLON
     {: RESULT = new VarDecl(t, id, txleft); :};
 
-MethodDeclaration ::= PUBLIC Type:t Identifier:id LPAREN RPAREN LBRACE VarDeclarationList:vdl StatementList:sl RETURN Expression:expr SEMICOLON RBRACE
-    {: RESULT = new MethodDecl(t, id, new Formal(), vdl, sl, expr, txleft); :}
-    | PUBLIC Type:t Identifier:id LPAREN FormalList:fl RPAREN LBRACE VarDeclarationList:vdl StatementList:sl RETURN Expression:expr SEMICOLON RBRACE
+MethodDeclaration ::= PUBLIC Type:t Identifier:id LPAREN FormalList:fl RPAREN LBRACE VarDeclarationList:vdl StatementList:sl RETURN Expression:expr SEMICOLON RBRACE
     {: RESULT = new MethodDecl(t, id, fl, vdl, sl, expr, txleft); :};
 /*
 Program ::= Statement:s
@@ -132,37 +130,37 @@ DisplayStatement ::= DISPLAY:d Expression:expr SEMICOLON
                      {: RESULT = new Display(expr, dxleft); :};
 */
 ExpressionList ::=
-    {: RESULT = new ExpList(0); :}
+    {: RESULT = new ExpList(new Location(0,0)); :}
     | Expression:expr ExpressionList:el
     {: el.add(expr);
        RESULT = el; :};
 
-ClassDeclarationList ::= 
-    {: RESULT = new ClassDeclList(0); :}
+ClassDeclarationList ::=
+    {: RESULT = new ClassDeclList(new Location(0,0)); :}
     | ClassDeclaration:cd ClassDeclarationList:cdl 
     {: cdl.add(cd);
        RESULT = cdl; :};
 
-MethodDeclarationList ::= 
-    {: RESULT = new MethodDeclList(0); :}
+MethodDeclarationList ::=
+    {: RESULT = new MethodDeclList(new Location(0,0)); :}
     | MethodDeclaration:md MethodDeclarationList:mdl 
     {: mdl.add(md);
        RESULT = mdl; :};
 
-VarDeclarationList ::= 
-    {: RESULT = new VarDeclList(0); :}
-    | VarDeclaration:vd VarDeclarationList:vdl 
+VarDeclarationList ::=
+    {: RESULT = new VarDeclList(new Location(0,0)); :}
+    | VarDeclarationList:vdl VarDeclaration:vd
     {: vdl.add(vd);
        RESULT = vdl; :};
 
-StatementList ::= 
-    {: RESULT = new StatementList(0); :}
+StatementList ::=
+    {: RESULT = new StatementList(new Location(0,0)); :}
     | Statement:s StatementList:sl
     {: sl.add(s);
        RESULT = sl; :};
 
-FormalList ::= 
-    {: RESULT = new FormalList(0); :}
+FormalList ::=
+    {: RESULT = new FormalList(new Location(0,0)); :}
     | Formal:f FormalList:fl
     {: fl.add(f);
        RESULT = fl; :};
