@@ -1,0 +1,8 @@
+We went through and removed most of the prior grammar before beginning the parser portion of the assignment. 
+From there we used the BNF specification for MiniJava to construct our grammar.
+
+
+We included code in our MiniJava file that takes the scanner information and puts it through the parser. And then 
+it takes that parsers roots node and feeds it into our implementations for AST print and PrettPrintVisitor. 
+We decided that including more than one visitor argument in the command to be an error, returning an exit status
+of 1. Also, we did not add any language extensions. 
