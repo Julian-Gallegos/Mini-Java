@@ -54,13 +54,20 @@ nonterminal VarDeclList VarDeclarationList;
 nonterminal MethodDeclList MethodDeclarationList;
 nonterminal StatementList StatementList;
 nonterminal Formal Formal;
-nonterminal FormalList FormalList
+nonterminal FormalList FormalList;
 
 
 /* Precedence declarations: */
 
-precedence left PLUS;
+precedence nonassoc BECOMES; 
 
+precedence nonassoc AND;
+precedence nonassoc LTHAN; 
+precedence left PLUS, MINUS; 
+precedence left TIMES;
+precedence right NEW;   
+precedence right NOT; 
+precedence left DOT; 
 
 /* Productions: */
 
@@ -85,6 +92,7 @@ MethodDeclaration ::= PUBLIC Type:t Identifier:id LPAREN RPAREN LBRACE VarDeclar
     {: RESULT = new MethodDecl(t, id, new Formal(), vdl, sl, expr, idxleft); :}
     | MethodDeclaration ::= PUBLIC Type:t Identifier:id LPAREN FormalList:fl RPAREN LBRACE VarDeclarationList:vdl StatementList:sl RETURN Expression:expr SEMICOLON RBRACE
     {: RESULT = new MethodDecl(t, id, fl, vdl, sl, expr, idxleft); :}
+
 Program ::= Statement:s
             {: List<Statement> p = new LinkedList<Statement>();
                p.add(s);
@@ -131,6 +139,45 @@ Identifier  ::= IDENTIFIER:id
 DisplayStatement ::= DISPLAY:d Expression:expr SEMICOLON
                      {: RESULT = new Display(expr, dxleft); :};
 */
+ExpressionList ::=
+    {: RESULT = new ExpList(0); :};
+    | Expression:expr ExpressionList:el
+        {: RESULT = el;
+        RESULT.add(expr); :};
+
+ClassDeclarationList ::= 
+    {: RESULT = new ClassDeclList(0); :};
+    | ClassDeclaration:cd ClassDeclarationList:cdl 
+        {: RESULT = cdl;
+        RESULT.add(cd); :};
+
+MethodDeclarationList ::= 
+    {: RESULT = new MethodDeclList(0); :};
+    | MethodDeclaration:md MethodDeclarationList:mdl 
+        {: RESULT = mdl;
+        RESULT.add(md); :};
+
+VarDeclarationList ::= 
+    {: RESULT = new VarDeclList(0); :};
+    | VarDeclaration:vd VarDeclarationList:vdl 
+        {: RESULT = vdl;
+        RESULT.add(vd); :};
+
+StatementList ::= 
+    {: RESULT = new StatementList(0); :};
+    | statement:s StatementList:sl 
+        {: RESULT = sl;
+        RESULT.add(s); :};
+
+FormalList ::= 
+    {: RESULT = new FormalList(0); :};
+    | Formal:f FormatList:fl 
+        {: RESULT = fl;
+        RESULT.add(f); :};
+
+Formal ::= Type:t Identifier:id 
+    {: RESULT = new Formal(t, id, tleft); :};
+
 Expression    ::= Expression:arg1 AND Expression:arg2
             {: RESULT = new And(arg1, arg2, arg1xleft); :}
         | Expression:arg1 LTHAN Expression:arg2
