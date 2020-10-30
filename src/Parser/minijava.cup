@@ -53,7 +53,7 @@ nonterminal Program Goal;
 nonterminal ClassDeclList ClassDeclarationList;
 nonterminal ClassDeclList ClassDeclarationListNotEmpty; 
 nonterminal VarDeclList VarDeclarationList;
-nonterminal VarDeclList VarDeclarationListNotEmpty; 
+//nonterminal VarDeclList VarDeclarationListNotEmpty;
 nonterminal MethodDeclList MethodDeclarationList;
 nonterminal MethodDeclList MethodDeclarationListNotEmpty; 
 nonterminal StatementList StatementList;
@@ -151,10 +151,10 @@ ExpressionList ::=
 
 ClassDeclarationListNotEmpty ::= 
     ClassDeclaration:cd 
-    {: ClassDeclarationList l = new ClassDecl(cdleft); 
+    {: ClassDeclList l = new ClassDeclList(cdxleft);
        l.add(cd); 
        RESULT = l; :}
-    | ClassDeclarationListNotEmpty:cl COMMA ClassDeclaration:cd 
+    | ClassDeclarationListNotEmpty:cl ClassDeclaration:cd
     {: cl.add(cd); 
        RESULT = cl; :}; 
 
@@ -165,10 +165,10 @@ ClassDeclarationList ::=
 
 MethodDeclarationListNotEmpty ::= 
     MethodDeclaration:md 
-    {: MethodDeclList l = new MethodDeclList(mdleft); 
+    {: MethodDeclList l = new MethodDeclList(mdxleft);
        l.add(md); 
        RESULT = l; :}
-    | MethodDeclarationListNotEmpty:mdl COMMA MethodDeclaration:m 
+    | MethodDeclarationListNotEmpty:mdl MethodDeclaration:m
     {: mdl.add(m); 
        RESULT = mdl; :}; 
 
@@ -176,10 +176,10 @@ MethodDeclarationList ::=
     {: RESULT = new MethodDeclList(new Location(0,0)); :}
     | MethodDeclarationListNotEmpty:mdl
     {: RESULT = mdl; :};
-
+/*
 VarDeclarationListNotEmpty ::= 
     VarDeclaration:v 
-    {: VarDeclList vl = new VarDeclList(vleft);
+    {: VarDeclList vl = new VarDeclList(vxleft);
        vl.add(v); 
        RESULT = vl; :}
     | VarDeclarationListNotEmpty:vl COMMA VarDeclaration:v 
@@ -190,13 +190,19 @@ VarDeclarationList ::=
     {: RESULT = new VarDeclList(new Location(0,0)); :}
     | VarDeclarationListNotEmpty:vl
     {: RESULT = vl; :};
+*/
+VarDeclarationList ::=
+    {: RESULT = new VarDeclList(new Location(0,0)); :}
+    | VarDeclarationList:vdl VarDeclaration:vd
+    {: vdl.add(vd);
+       RESULT = vdl; :};
 
 StatementListNotEmpty ::= 
     Statement:s 
-    {: StatementList sl = new StatementList(sleft); 
+    {: StatementList sl = new StatementList(sxleft);
        sl.add(s); 
        RESULT = sl; :}
-    | StatementListNotEmpty:sl COMMA Statement:s 
+    | StatementListNotEmpty:sl Statement:s
     {: sl.add(s); 
        RESULT = sl; :}; 
 
@@ -208,7 +214,7 @@ StatementList ::=
 
 FormalListNotEmpty ::= 
     Formal:f
-    {: FormalList fl = new FormalList(fleft); 
+    {: FormalList fl = new FormalList(fxleft);
        fl.add(f); 
        RESULT = fl; :}
     | FormalListNotEmpty:fl COMMA Formal:f 
