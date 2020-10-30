@@ -97,8 +97,8 @@ Program ::= Statement:s
 */
 Type ::= INT:integer LBRACKET RBRACKET 
     {: RESULT = new IntArrayType(integerxleft); :}
-    | BOOL:boolean 
-    {: RESULT = new BooleanType(booleanxleft); :}
+    | BOOL:booleantype
+    {: RESULT = new BooleanType(booleantypexleft); :}
     | INT:integer 
     {: RESULT = new IntegerType(integerxleft); :}
     | Identifier:id 
@@ -196,7 +196,7 @@ Expression    ::= Expression:arg1 AND Expression:arg2
     {: RESULT = new This(argxleft); :}
     | NEW INT LBRACKET Expression:expr RBRACKET
     {: RESULT = new NewArray(expr, exprxleft); :}
-    | NEW IDENTIFIER:arg LPAREN RPAREN
+    | NEW Identifier:arg LPAREN RPAREN
     {: RESULT = new NewObject(arg, argxleft); :}
     | NOT Expression:expr
     {: RESULT = new Not(expr, exprxleft); :}

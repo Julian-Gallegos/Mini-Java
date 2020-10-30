@@ -262,11 +262,9 @@ comma [^\"]* comma {
 {white}+ { /* ignore whitespace */ }
 
 /* multi line comment */
-/* "/*" (({letter}|{digit}|_|/|\| |{eol})*|"*"+({nofwdslashstar})*)"*/" { /* ignore multi line comments */ } */
 "/*" {multilinehelper}*"*/" { /* ignore multi line comments */ }
 
 /* single line comment */
-/* "//" (({letter}|{digit}|_|"/"| )*|\+({norn}|_| )*){eol}? { /* ignore single line comments */ } */
 "//" {everythingButEOL}*{eol}? { /* ignore single line comments */ }
 
 

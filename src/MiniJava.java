@@ -26,7 +26,7 @@ public class MiniJava {
                 statement.accept(new PrettyPrintVisitor());
                 System.out.print("\n");
             }
-            /*
+            /* uncomment to print scanner tokens
             Symbol t = s.next_token();
             while (t.sym != sym.EOF) { 
                 // print each token that we scan
