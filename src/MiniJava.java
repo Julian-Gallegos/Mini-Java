@@ -25,7 +25,10 @@ public class MiniJava {
             }
             String option = args[0];
             if (option.equals("-A")) {
-
+                @SuppressWarnings("unchecked")
+                Program program = (Program) root.value; 
+                program.accept(new ASTPrintVisitor());
+                System.out.println("\n"); 
             } else if (option.equals("-P")) {
                 @SuppressWarnings("unchecked")
                 Program program = (Program)root.value;
