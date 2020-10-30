@@ -13,27 +13,36 @@ public class MiniJava {
         try {
             // create a scanner on the input file
             ComplexSymbolFactory sf = new ComplexSymbolFactory();
-            File filePath = new File(args[1]); 
+            File filePath = new File(args[args.length - 1]); 
             InputStream inputStream = new FileInputStream(filePath); 
             Reader in = new BufferedReader(new InputStreamReader(inputStream));
             scanner s = new scanner(in, sf);
             parser p = new parser(s, sf);
             Symbol root = p.parse();
 
-            @SuppressWarnings("unchecked")
-            List<Statement> program = (List<Statement>)root.value;
-            for (Statement statement: program) {
-                statement.accept(new PrettyPrintVisitor());
-                System.out.print("\n");
+            if (args.length > 3) {
+                System.exit(1); 
             }
-            /* uncomment to print scanner tokens
-            Symbol t = s.next_token();
-            while (t.sym != sym.EOF) { 
-                // print each token that we scan
-                System.out.print(s.symbolToString(t) + " ");
-                t = s.next_token();
+            String option = args[1]; 
+            if (option.equals("-A")) {
+                
+            } else if (option.equals("-P")) {
+                @SuppressWarnings("unchecked")
+                List<Statement> program = (List<Statement>)root.value;
+                for (Statement statement: program) {
+                    statement.accept(new PrettyPrintVisitor());
+                    System.out.print("\n");
+                }
+            } else if (option.equals("-S")) {
+                Symbol t = s.next_token();
+                while (t.sym != sym.EOF) { 
+                    // print each token that we scan
+                    System.out.print(s.symbolToString(t) + " ");
+                    t = s.next_token();
+                }
+            } else {
+                System.exit(1);   
             }
-            */
             System.exit(0);
         } catch (Exception e) {
             // yuck: some kind of error in the compiler implementation
