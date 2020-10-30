@@ -156,7 +156,7 @@ public class ASTPrintVisitor implements Visitor {
     System.out.println();
     n.s1.accept(this); // if true 
     System.out.println();
-    System.out.print(("else ");
+    System.out.print("else ");
     n.s2.accept(this);
   }
 
@@ -179,7 +179,7 @@ public class ASTPrintVisitor implements Visitor {
   // Exp e;
   public void visit(Assign n) {
     n.i.accept(this);
-    System.out.print(" = "); 
+    System.out.print(" = ");
     n.e.accept(this);
   }
 
@@ -187,54 +187,69 @@ public class ASTPrintVisitor implements Visitor {
   // Exp e1,e2;
   public void visit(ArrayAssign n) {
     n.i.accept(this);
+    System.out.print("[");
     n.e1.accept(this);
+    System.out.print("] = ");
     n.e2.accept(this);
   }
 
   // Exp e1,e2;
   public void visit(And n) {
+    System.out.print("(");
     n.e1.accept(this);
-    System.out.print(" && "); 
+    System.out.print(" && ");
     n.e2.accept(this);
+    System.out.print(")");
   }
 
   // Exp e1,e2;
   public void visit(LessThan n) {
+    System.out.print("(");
     n.e1.accept(this);
-    System.out.print(" < "); 
+    System.out.print(" < ");
     n.e2.accept(this);
+    System.out.print(")");
   }
 
   // Exp e1,e2;
   public void visit(Plus n) {
+    System.out.print("(");
     n.e1.accept(this);
-    System.out.print(" + "); 
+    System.out.print(" + ");
     n.e2.accept(this);
+    System.out.print(")");
   }
 
   // Exp e1,e2;
   public void visit(Minus n) {
+    System.out.print("(");
     n.e1.accept(this);
-    System.out.print(" - "); 
+    System.out.print(" - ");
     n.e2.accept(this);
+    System.out.print(")");
   }
 
   // Exp e1,e2;
   public void visit(Times n) {
+    System.out.print("(");
     n.e1.accept(this);
-    System.out.print(" * "); 
+    System.out.print(" * ");
     n.e2.accept(this);
+    System.out.print(")");
   }
 
   // Exp e1,e2;
   public void visit(ArrayLookup n) {
     n.e1.accept(this);
+    System.out.print("[");
     n.e2.accept(this);
+    System.out.print("]");
   }
 
   // Exp e;
   public void visit(ArrayLength n) {
     n.e.accept(this);
+    System.out.print(".length");
   }
 
   // Exp e;
@@ -242,14 +257,14 @@ public class ASTPrintVisitor implements Visitor {
   // ExpList el;
   public void visit(Call n) {
     n.e.accept(this);
-    System.out.print(".(");
+    System.out.print(".");
     n.i.accept(this);
-
+    System.out.print("(");
     for ( int i = 0; i < n.el.size(); i++ ) {
-        n.el.get(i).accept(this);
-        if ( i+1 < n.el.size() ) { System.out.print(", "); }
+      n.el.get(i).accept(this);
+      if ( i+1 < n.el.size() ) { System.out.print(", "); }
     }
-    System.out.println(")"); 
+    System.out.print(")");
   }
 
   // int i;
@@ -276,16 +291,21 @@ public class ASTPrintVisitor implements Visitor {
 
   // Exp e;
   public void visit(NewArray n) {
+    System.out.print("new int [");
     n.e.accept(this);
+    System.out.print("]");
   }
 
   // Identifier i;
   public void visit(NewObject n) {
+    System.out.print("new ");
     System.out.print(n.i.s);
+    System.out.print("()");
   }
 
   // Exp e;
   public void visit(Not n) {
+    System.out.print("!");
     n.e.accept(this);
   }
 
