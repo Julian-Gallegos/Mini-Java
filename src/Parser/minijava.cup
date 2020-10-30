@@ -51,11 +51,16 @@ nonterminal VarDecl VarDeclaration;
 nonterminal MethodDecl MethodDeclaration;
 nonterminal Program Goal;
 nonterminal ClassDeclList ClassDeclarationList;
+nonterminal ClassDeclList ClassDeclarationListNotEmpty; 
 nonterminal VarDeclList VarDeclarationList;
+nonterminal VarDeclList VarDeclarationListNotEmpty; 
 nonterminal MethodDeclList MethodDeclarationList;
+nonterminal MethodDeclList MethodDeclarationListNotEmpty; 
 nonterminal StatementList StatementList;
+nonterminal StatementList StatementListNotEmpty; 
 nonterminal Formal Formal;
 nonterminal FormalList FormalList;
+nonterminal FormalList FormalListNotEmpty; 
 
 
 /* Precedence declarations: */
@@ -144,35 +149,76 @@ ExpressionList ::=
     |  ExpressionListNotEmpty:el
     {: RESULT = el; :};
 
+ClassDeclarationListNotEmpty ::= 
+    ClassDeclaration:cd 
+    {: ClassDeclarationList l = new ClassDecl(cdleft); 
+       l.add(cd); 
+       RESULT = l; :}
+    | ClassDeclarationListNotEmpty:cl COMMA ClassDeclaration:cd 
+    {: cl.add(cd); 
+       RESULT = cl; :}; 
+
 ClassDeclarationList ::=
     {: RESULT = new ClassDeclList(new Location(0,0)); :}
-    | ClassDeclaration:cd ClassDeclarationList:cdl 
-    {: cdl.add(cd);
-       RESULT = cdl; :};
+    | ClassDeclarationListNotEmpty:l 
+    {: RESULT = l; :};
+
+MethodDeclarationListNotEmpty ::= 
+    MethodDeclaration:md 
+    {: MethodDeclList l = new MethodDeclList(mdleft); 
+       l.add(md); 
+       RESULT = l; :}
+    | MethodDeclarationListNotEmpty:mdl COMMA MethodDeclaration:m 
+    {: mdl.add(m); 
+       RESULT = mdl; :}; 
 
 MethodDeclarationList ::=
     {: RESULT = new MethodDeclList(new Location(0,0)); :}
-    | MethodDeclaration:md MethodDeclarationList:mdl 
-    {: mdl.add(md);
-       RESULT = mdl; :};
+    | MethodDeclarationListNotEmpty:mdl
+    {: RESULT = mdl; :};
+
+VarDeclarationListNotEmpty ::= 
+    VarDeclaration:v 
+    {: VarDeclList vl = new VarDeclList(vleft);
+       vl.add(v); 
+       RESULT = vl; :}
+    | VarDeclarationListNotEmpty:vl COMMA VarDeclaration:v 
+    {: vl.add(v); 
+       RESULT = vl; :}; 
 
 VarDeclarationList ::=
     {: RESULT = new VarDeclList(new Location(0,0)); :}
-    | VarDeclarationList:vdl VarDeclaration:vd
-    {: vdl.add(vd);
-       RESULT = vdl; :};
+    | VarDeclarationListNotEmpty:vl
+    {: RESULT = vl; :};
+
+StatementListNotEmpty ::= 
+    Statement:s 
+    {: StatementList sl = new StatementList(sleft); 
+       sl.add(s); 
+       RESULT = sl; :}
+    | StatementListNotEmpty:sl COMMA Statement:s 
+    {: sl.add(s); 
+       RESULT = sl; :}; 
 
 StatementList ::=
     {: RESULT = new StatementList(new Location(0,0)); :}
-    | Statement:s StatementList:sl
-    {: sl.add(s);
-       RESULT = sl; :};
+    | StatementListNotEmpty:sl
+    {: RESULT = sl; :};
+
+
+FormalListNotEmpty ::= 
+    Formal:f
+    {: FormalList fl = new FormalList(fleft); 
+       fl.add(f); 
+       RESULT = fl; :}
+    | FormalListNotEmpty:fl COMMA Formal:f 
+    {: fl.add(f); 
+       RESULT = fl; :}; 
 
 FormalList ::=
     {: RESULT = new FormalList(new Location(0,0)); :}
-    | Formal:f FormalList:fl
-    {: fl.add(f);
-       RESULT = fl; :};
+    | FormalListNotEmpty:fl
+    {: RESULT = fl; :};
 
 Formal ::= Type:t Identifier:id 
     {: RESULT = new Formal(t, id, txleft); :};
