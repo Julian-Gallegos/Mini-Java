@@ -93,9 +93,11 @@ public class ASTPrintVisitor implements Visitor {
     System.out.print("MethodDecl "); 
     n.i.accept(this);   // method name 
     System.out.println("line (" + n.i.line_number + ")"); 
-    n.t.accept(this);   // return type  
+    System.out.print("returns"); 
+    n.t.accept(this);   // return type 
+    System.out.println(); 
     System.out.println("parameters:"); 
-    
+
     for ( int i = 0; i < n.fl.size(); i++ ) {
         n.fl.get(i).accept(this);
         if (i+1 < n.fl.size()) { System.out.print(", "); }
@@ -110,7 +112,7 @@ public class ASTPrintVisitor implements Visitor {
         n.sl.get(i).accept(this);
         if ( i < n.sl.size() ) { System.out.println(""); }
     }
-    System.out.print("    return ");
+    System.out.print("    Return ");
     n.e.accept(this);
   }
 
@@ -151,9 +153,9 @@ public class ASTPrintVisitor implements Visitor {
   // Exp e;
   // Statement s1,s2;
   public void visit(If n) {
-    System.out.print("if ");
+    System.out.print("if (");
     n.e.accept(this);
-    System.out.println();
+    System.out.println(")");
     n.s1.accept(this); // if true 
     System.out.println();
     System.out.print("else ");
@@ -163,9 +165,9 @@ public class ASTPrintVisitor implements Visitor {
   // Exp e;
   // Statement s;
   public void visit(While n) {
-    System.out.print("while ");
+    System.out.print("while (");
     n.e.accept(this);
-    System.out.print(" ");
+    System.out.print(") ");
     n.s.accept(this);
   }
 
