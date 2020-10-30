@@ -3,6 +3,8 @@ package AST.Visitor;
 import AST.*;
 
 public class ASTPrintVisitor implements Visitor {
+
+  private int counter = 0;
     
      // Display added for toy example language.  Not used in regular MiniJava
   public void visit(Display n) {
@@ -25,32 +27,45 @@ public class ASTPrintVisitor implements Visitor {
   // Identifier i1,i2;
   // Statement s;
   public void visit(MainClass n) {
-    System.out.print("MainClass "); 
+    System.out.print("  MainClass ");
+    counter += 2;
     n.i1.accept(this);   // class name 
     System.out.println(" (line " + n.i1.line_number + ")"); 
     //n.i2.accept(this);  // main method parameter
-    n.s.accept(this);  // main method body  
+    System.out.print("    ");
+    counter += 2;
+    n.s.accept(this);  // main method body
+    counter -= 4;
   }
 
   // Identifier i;
   // VarDeclList vl;
   // MethodDeclList ml;
   public void visit(ClassDeclSimple n) {
-    System.out.print("Class ");
+    System.out.print("  Class ");
     n.i.accept(this);  // class name  + extends ... 
-    System.out.println(" (line " + n.i.line_number + ")"); 
-    
-    
+    System.out.println(" (line " + n.i.line_number + ")");
+    counter += 2;
+    if (n.vl.size() > 0) {
+      System.out.println("    variables:");
+    }
     for ( int i = 0; i < n.vl.size(); i++ ) {
-        System.out.print("  ");
+        System.out.print("      ");
         n.vl.get(i).accept(this);
-        if ( i+1 < n.vl.size() ) { System.out.println(); }
+        if ( i < n.vl.size() ) { System.out.println(); }
     }
     for ( int i = 0; i < n.ml.size(); i++ ) {
+        System.out.print("    ");
+        counter += 2;
         n.ml.get(i).accept(this);
-        System.out.println(" (line " + n.ml.get(i).line_number + ")"); 
+        if(i+1 < n.ml.size()) {
+          System.out.println(" (line " + n.ml.get(i).line_number + ")");
+        } else {
+          System.out.print(" (line " + n.ml.get(i).line_number + ")");
+        }
+        counter -= 2;
     }
-    System.out.println();
+    counter -= 2;
   }
  
   // Identifier i;
@@ -59,20 +74,31 @@ public class ASTPrintVisitor implements Visitor {
   // MethodDeclList ml;
   public void visit(ClassDeclExtends n) {
     System.out.print("Class ");
+    counter += 2;
     n.i.accept(this);
     System.out.print(" extends ");
     n.j.accept(this);
-    System.out.println("(line " + n.j.line_number + ")"); 
+    System.out.println("(line " + n.j.line_number + ")");
+    if (n.vl.size() > 0) {
+      System.out.println("    variables:");
+    }
     for ( int i = 0; i < n.vl.size(); i++ ) {
-        System.out.print("  ");
+        System.out.print("      ");
         n.vl.get(i).accept(this);
-        if ( i+1 < n.vl.size() ) { System.out.println(); }
+        if ( i < n.vl.size() ) { System.out.println(); }
     }
     for ( int i = 0; i < n.ml.size(); i++ ) {
-        System.out.println();
+        System.out.print("    ");
+        counter += 2;
         n.ml.get(i).accept(this);
+        if(i+1 < n.ml.size()) {
+          System.out.println(" (line " + n.ml.get(i).line_number + ")");
+        } else {
+          System.out.print(" (line " + n.ml.get(i).line_number + ")");
+        }
+        counter -= 2;
     }
-    System.out.println();
+    counter -= 2;
   }
 
   // Type t;
@@ -93,26 +119,32 @@ public class ASTPrintVisitor implements Visitor {
     System.out.print("MethodDecl "); 
     n.i.accept(this);   // method name 
     System.out.println("line (" + n.i.line_number + ")"); 
-    System.out.print("returns"); 
+    System.out.print("      returns ");
     n.t.accept(this);   // return type 
     System.out.println(); 
-    System.out.println("parameters:"); 
+    System.out.println("      parameters:");
 
     for ( int i = 0; i < n.fl.size(); i++ ) {
+        System.out.print("        ");
         n.fl.get(i).accept(this);
-        if (i+1 < n.fl.size()) { System.out.print(", "); }
+        System.out.println();
+    }
+    if (n.vl.size() > 0) {
+      System.out.println("      variables:");
     }
     for ( int i = 0; i < n.vl.size(); i++ ) {
-        System.out.print("    ");
+        System.out.print("        ");
         n.vl.get(i).accept(this);
-        System.out.println("");
+        System.out.println();
     }
     for ( int i = 0; i < n.sl.size(); i++ ) {
-        System.out.print("    ");
+        System.out.print("      ");
+        counter += 2;
         n.sl.get(i).accept(this);
-        if ( i < n.sl.size() ) { System.out.println(""); }
+        System.out.println();
+        counter -= 2;
     }
-    System.out.print("    Return ");
+    System.out.print("      Return ");
     n.e.accept(this);
   }
 
@@ -144,37 +176,67 @@ public class ASTPrintVisitor implements Visitor {
   // StatementList sl;
   public void visit(Block n) {
     for ( int i = 0; i < n.sl.size(); i++ ) {
-        System.out.print("      ");
+        if (i != 0) {
+          for (int j = 0; j < counter; j++) {
+            System.out.print(" ");
+          }
+        }
         n.sl.get(i).accept(this);
-        System.out.println();
+        if(i+1 < n.sl.size()) {
+          System.out.println();
+        }
     }
   }
 
   // Exp e;
   // Statement s1,s2;
   public void visit(If n) {
-    System.out.print("if (");
+    System.out.print("if ");
     n.e.accept(this);
-    System.out.println(")");
-    n.s1.accept(this); // if true 
+    counter += 2;
     System.out.println();
+    for(int i = 0; i < counter; i++) {
+      System.out.print(" ");
+    }
+    n.s1.accept(this); // if true
+    counter -= 2;
+    System.out.println();
+    for(int i = 0; i < counter; i++) {
+      System.out.print(" ");
+    }
     System.out.print("else ");
+    System.out.println();
+    counter += 2;
+    for(int i = 0; i < counter; i++) {
+      System.out.print(" ");
+    }
     n.s2.accept(this);
+    counter -= 2;
   }
 
   // Exp e;
   // Statement s;
   public void visit(While n) {
-    System.out.print("while (");
+    System.out.print("while ");
     n.e.accept(this);
-    System.out.print(") ");
+    System.out.print("\n");
+    counter += 2;
+    for(int i = 0; i < counter; i++) {
+      System.out.print(" ");
+    }
     n.s.accept(this);
+    counter -= 2;
   }
 
   // Exp e;
   public void visit(Print n) {
     System.out.println("Print (line " + n.e.line_number + ")");
+    counter += 2;
+    for(int i = 0; i < counter; i++) {
+      System.out.print(" ");
+    }
     n.e.accept(this);
+    counter -= 2;
   }
   
   // Identifier i;
