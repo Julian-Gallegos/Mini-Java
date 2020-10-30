@@ -20,19 +20,18 @@ public class MiniJava {
             parser p = new parser(s, sf);
             Symbol root = p.parse();
 
-            if (args.length > 3) {
+            if (args.length > 2) {
                 System.exit(1); 
             }
-            String option = args[1]; 
+            String option = args[0];
             if (option.equals("-A")) {
-                
+
             } else if (option.equals("-P")) {
                 @SuppressWarnings("unchecked")
-                List<Statement> program = (List<Statement>)root.value;
-                for (Statement statement: program) {
-                    statement.accept(new PrettyPrintVisitor());
-                    System.out.print("\n");
-                }
+                Program program = (Program)root.value;
+                program.accept(new PrettyPrintVisitor());
+                System.out.print("\n");
+
             } else if (option.equals("-S")) {
                 Symbol t = s.next_token();
                 while (t.sym != sym.EOF) { 

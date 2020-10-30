@@ -93,14 +93,7 @@ VarDeclaration ::= Type:t Identifier:id SEMICOLON
 
 MethodDeclaration ::= PUBLIC Type:t Identifier:id LPAREN FormalList:fl RPAREN LBRACE VarDeclarationList:vdl StatementList:sl RETURN Expression:expr SEMICOLON RBRACE
     {: RESULT = new MethodDecl(t, id, fl, vdl, sl, expr, txleft); :};
-/*
-Program ::= Statement:s
-    {: List<Statement> p = new LinkedList<Statement>()
-       p.add(s);
-       RESULT = p; :}
-    |  Program:p Statement:s
-    {: p.add(s); RESULT = p; :};
-*/
+
 Type ::= INT:integer LBRACKET RBRACKET 
     {: RESULT = new IntArrayType(integerxleft); :}
     | BOOL:booleantype
@@ -122,19 +115,6 @@ Statement   ::= LBRACE StatementList:sl RBRACE
     {: RESULT = new Assign(id, expr, idxleft); :}
     | Identifier:id LBRACKET Expression:expr1 RBRACKET BECOMES Expression:expr2 SEMICOLON
     {: RESULT = new ArrayAssign(id, expr1, expr2, idxleft); :};
-    /*
-            AssignStatement:s
-                {: RESULT = s; :}
-            | DisplayStatement:s
-                {: RESULT = s; :};
-    */
-
-/*
-AssignStatement ::= Identifier:id BECOMES Expression:expr SEMICOLON
-                    {: RESULT = new Assign(id, expr, idxleft); :};
-DisplayStatement ::= DISPLAY:d Expression:expr SEMICOLON
-                     {: RESULT = new Display(expr, dxleft); :};
-*/
 
 ExpressionListNotEmpty ::= Expression:expr
     {: ExpList l = new ExpList(exprxleft);
@@ -176,21 +156,7 @@ MethodDeclarationList ::=
     {: RESULT = new MethodDeclList(new Location(0,0)); :}
     | MethodDeclarationListNotEmpty:mdl
     {: RESULT = mdl; :};
-/*
-VarDeclarationListNotEmpty ::= 
-    VarDeclaration:v 
-    {: VarDeclList vl = new VarDeclList(vxleft);
-       vl.add(v); 
-       RESULT = vl; :}
-    | VarDeclarationListNotEmpty:vl COMMA VarDeclaration:v 
-    {: vl.add(v); 
-       RESULT = vl; :}; 
 
-VarDeclarationList ::=
-    {: RESULT = new VarDeclList(new Location(0,0)); :}
-    | VarDeclarationListNotEmpty:vl
-    {: RESULT = vl; :};
-*/
 VarDeclarationList ::=
     {: RESULT = new VarDeclList(new Location(0,0)); :}
     | VarDeclarationList:vdl VarDeclaration:vd
