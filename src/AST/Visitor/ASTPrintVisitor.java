@@ -27,8 +27,8 @@ public class ASTPrintVisitor implements Visitor {
   public void visit(MainClass n) {
     System.out.print("MainClass "); 
     n.i1.accept(this);   // class name 
-    System.out.println(" (line (X))" ); 
-    n.i2.accept(this);  // main method parameter
+    System.out.println(" (line (" + n.i1.line_number + ")"); 
+    //n.i2.accept(this);  // main method parameter
     n.s.accept(this);  // main method body  
   }
 
