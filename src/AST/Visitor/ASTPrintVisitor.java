@@ -38,6 +38,8 @@ public class ASTPrintVisitor implements Visitor {
   public void visit(ClassDeclSimple n) {
     System.out.print("Class ");
     n.i.accept(this);  // class name  + extends ... 
+    System.out.println(" (line " + n.i.line_number + ")"); 
+    
     
     for ( int i = 0; i < n.vl.size(); i++ ) {
         System.out.print("  ");
@@ -45,8 +47,9 @@ public class ASTPrintVisitor implements Visitor {
         if ( i+1 < n.vl.size() ) { System.out.println(); }
     }
     for ( int i = 0; i < n.ml.size(); i++ ) {
-        System.out.println();
+        System.out.print("MethodDecl "); 
         n.ml.get(i).accept(this);
+        System.out.println(" (line " + n.ml.get(i).line_number); 
     }
     System.out.println();
   }
@@ -56,10 +59,11 @@ public class ASTPrintVisitor implements Visitor {
   // VarDeclList vl;
   // MethodDeclList ml;
   public void visit(ClassDeclExtends n) {
-    System.out.print("class ");
+    System.out.print("Class ");
     n.i.accept(this);
-    System.out.println(" extends ");
+    System.out.print(" extends ");
     n.j.accept(this);
+    System.out.println("(line " + n.j.line_number + ")"); 
     for ( int i = 0; i < n.vl.size(); i++ ) {
         System.out.print("  ");
         n.vl.get(i).accept(this);
@@ -88,9 +92,10 @@ public class ASTPrintVisitor implements Visitor {
   // Exp e;
   public void visit(MethodDecl n) {
     System.out.print("  public ");
-    n.t.accept(this);
+    n.t.accept(this);   // method type void, int, etc..
     System.out.print(" ");
-    n.i.accept(this);
+    n.i.accept(this);   // method name 
+    System.out.println("parameters:"); 
     for ( int i = 0; i < n.fl.size(); i++ ) {
         n.fl.get(i).accept(this);
         if (i+1 < n.fl.size()) { System.out.print(", "); }
@@ -146,7 +151,7 @@ public class ASTPrintVisitor implements Visitor {
   // Exp e;
   // Statement s1,s2;
   public void visit(If n) {
-    System.out.print("if (");
+    System.out.print("if ");
     n.e.accept(this);
     System.out.println(") ");
     System.out.print("    ");
@@ -159,14 +164,15 @@ public class ASTPrintVisitor implements Visitor {
   // Exp e;
   // Statement s;
   public void visit(While n) {
-    System.out.print("while (");
+    System.out.print("while ");
     n.e.accept(this);
-    System.out.print(") ");
+    System.out.print(" ");
     n.s.accept(this);
   }
 
   // Exp e;
   public void visit(Print n) {
+    System.out.println("Print (line " + n.e.line_number + ")");
     n.e.accept(this);
   }
   
@@ -174,6 +180,7 @@ public class ASTPrintVisitor implements Visitor {
   // Exp e;
   public void visit(Assign n) {
     n.i.accept(this);
+    System.out.print(" = "); 
     n.e.accept(this);
   }
 
@@ -188,30 +195,35 @@ public class ASTPrintVisitor implements Visitor {
   // Exp e1,e2;
   public void visit(And n) {
     n.e1.accept(this);
+    System.out.print(" && "); 
     n.e2.accept(this);
   }
 
   // Exp e1,e2;
   public void visit(LessThan n) {
     n.e1.accept(this);
+    System.out.print(" < "); 
     n.e2.accept(this);
   }
 
   // Exp e1,e2;
   public void visit(Plus n) {
     n.e1.accept(this);
+    System.out.print(" + "); 
     n.e2.accept(this);
   }
 
   // Exp e1,e2;
   public void visit(Minus n) {
     n.e1.accept(this);
+    System.out.print(" - "); 
     n.e2.accept(this);
   }
 
   // Exp e1,e2;
   public void visit(Times n) {
     n.e1.accept(this);
+    System.out.print(" * "); 
     n.e2.accept(this);
   }
 
