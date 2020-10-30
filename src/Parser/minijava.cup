@@ -30,7 +30,7 @@ terminal String TEXT;
 terminal String IDENTIFIER;
 
 /* digits */
-terminal Integer DIGIT; 
+terminal String DIGIT;
 
 
 
@@ -42,6 +42,7 @@ nonterminal Statement Statement;
 //nonterminal Assign AssignStatement;
 nonterminal Exp Expression;
 nonterminal ExpList ExpressionList;
+nonterminal ExpList ExpressionListNotEmpty;
 nonterminal Identifier Identifier;
 nonterminal Type Type; 
 nonterminal MainClass MainClass; 
@@ -129,11 +130,19 @@ AssignStatement ::= Identifier:id BECOMES Expression:expr SEMICOLON
 DisplayStatement ::= DISPLAY:d Expression:expr SEMICOLON
                      {: RESULT = new Display(expr, dxleft); :};
 */
-ExpressionList ::=
-    {: RESULT = new ExpList(new Location(0,0)); :}
-    | Expression:expr ExpressionList:el
+
+ExpressionListNotEmpty ::= Expression:expr
+    {: ExpList l = new ExpList(exprxleft);
+       l.add(expr);
+       RESULT = l; :}
+    | ExpressionListNotEmpty:el COMMA Expression:expr
     {: el.add(expr);
        RESULT = el; :};
+
+ExpressionList ::=
+    {: RESULT = new ExpList(new Location(0,0)); :}
+    |  ExpressionListNotEmpty:el
+    {: RESULT = el; :};
 
 ClassDeclarationList ::=
     {: RESULT = new ClassDeclList(new Location(0,0)); :}
@@ -185,7 +194,7 @@ Expression    ::= Expression:arg1 AND Expression:arg2
     | Expression:expr1 DOT Identifier:id LPAREN ExpressionList:el RPAREN
     {: RESULT = new Call(expr1, id, el, expr1xleft); :}
     | DIGIT:arg
-    {: RESULT = new IntegerLiteral(arg, argxleft); :}
+    {: RESULT = new IntegerLiteral(Integer.parseInt(arg), argxleft); :}
     | TRUE:arg
     {: RESULT = new True(argxleft); :}
     | FALSE:arg

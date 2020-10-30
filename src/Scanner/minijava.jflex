@@ -208,6 +208,7 @@ comma = "\""
 "while" { return symbol(sym.WHILE); }
 "System.out.println" { return symbol(sym.STDOUT); }
 "int" { return symbol(sym.INT); }
+"String" { return symbol(sym.STRING); }
 "boolean" { return symbol(sym.BOOL); }
 "true" { return symbol(sym.TRUE); }
 "false" { return symbol(sym.FALSE); }
