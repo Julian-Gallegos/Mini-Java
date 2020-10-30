@@ -37,9 +37,9 @@ terminal Integer DIGIT;
 
 /* Nonterminals (constructed by parser): */
 
-nonterminal List<Statement> Program;
+//nonterminal List<Statement> Program;
 nonterminal Statement Statement;
-nonterminal Assign AssignStatement;
+//nonterminal Assign AssignStatement;
 nonterminal Exp Expression;
 nonterminal ExpList ExpressionList;
 nonterminal Identifier Identifier;
@@ -71,27 +71,27 @@ precedence left DOT;
 /* Productions: */
 
 Goal ::= MainClass:m ClassDeclarationList:cdl
-    {: RESULT = new Program(m, cdl, mxleft); :}
+    {: RESULT = new Program(m, cdl, mxleft); :};
 
 
 MainClass ::= CLASS Identifier:id1 LBRACE PUBLIC STATIC VOID MAIN LPAREN STRING LBRACKET RBRACKET Identifier:id2 RPAREN LBRACE Statement:statement RBRACE RBRACE
-    {: RESULT = new MainClass(id1, id2, statement, id1xleft); :}
+    {: RESULT = new MainClass(id1, id2, statement, id1xleft); :};
 
 ClassDeclaration ::= CLASS Identifier:id LBRACE VarDeclarationList:vdl MethodDeclarationList:mdl RBRACE
     {: RESULT = new ClassDeclSimple(id, vdl, mdl, idxleft); :}
     | CLASS Identifier:id1 EXTENDS Identifier:id2 LBRACE VarDeclarationList:vdl MethodDeclarationList:mdl RBRACE
-    {: RESULT = new ClassDeclExtends(id1, id2, vdl, mdl, id1xleft); :}
+    {: RESULT = new ClassDeclExtends(id1, id2, vdl, mdl, id1xleft); :};
 
 VarDeclaration ::= Type:t Identifier:id SEMICOLON
-    {: RESULT = new VarDecl(t, id, txleft); :}
+    {: RESULT = new VarDecl(t, id, txleft); :};
 
 MethodDeclaration ::= PUBLIC Type:t Identifier:id LPAREN RPAREN LBRACE VarDeclarationList:vdl StatementList:sl RETURN Expression:expr SEMICOLON RBRACE
     {: RESULT = new MethodDecl(t, id, new Formal(), vdl, sl, expr, txleft); :}
-    | MethodDeclaration ::= PUBLIC Type:t Identifier:id LPAREN FormalList:fl RPAREN LBRACE VarDeclarationList:vdl StatementList:sl RETURN Expression:expr SEMICOLON RBRACE
-    {: RESULT = new MethodDecl(t, id, fl, vdl, sl, expr, txleft); :}
+    | PUBLIC Type:t Identifier:id LPAREN FormalList:fl RPAREN LBRACE VarDeclarationList:vdl StatementList:sl RETURN Expression:expr SEMICOLON RBRACE
+    {: RESULT = new MethodDecl(t, id, fl, vdl, sl, expr, txleft); :};
 /*
 Program ::= Statement:s
-    {: List<Statement> p = new LinkedList<Statement>();
+    {: List<Statement> p = new LinkedList<Statement>()
        p.add(s);
        RESULT = p; :}
     |  Program:p Statement:s
@@ -104,7 +104,7 @@ Type ::= INT:integer LBRACKET RBRACKET
     | INT:integer 
     {: RESULT = new IntegerType(integerxleft); :}
     | Identifier:id 
-    {: RESULT = new IdentifierType(id.toString(), idxleft); :}
+    {: RESULT = new IdentifierType(id.toString(), idxleft); :};
 
 Statement   ::= LBRACE StatementList:sl RBRACE
     {: RESULT = new Block(sl,slxleft); :}
@@ -115,7 +115,7 @@ Statement   ::= LBRACE StatementList:sl RBRACE
     | STDOUT LPAREN Expression:expr RPAREN SEMICOLON
     {: RESULT = new Print(expr, exprxleft); :}
     | Identifier:id BECOMES Expression:expr SEMICOLON
-    {: RESULT = new Assign(id, expr, idxleft); :};
+    {: RESULT = new Assign(id, expr, idxleft); :}
     | Identifier:id LBRACKET Expression:expr1 RBRACKET BECOMES Expression:expr2 SEMICOLON
     {: RESULT = new ArrayAssign(id, expr1, expr2, idxleft); :};
     /*
@@ -132,40 +132,40 @@ DisplayStatement ::= DISPLAY:d Expression:expr SEMICOLON
                      {: RESULT = new Display(expr, dxleft); :};
 */
 ExpressionList ::=
-    {: RESULT = new ExpList(0); :};
+    {: RESULT = new ExpList(0); :}
     | Expression:expr ExpressionList:el
-    {: RESULT = el;
-       RESULT.add(expr); :};
+    {: el.add(expr);
+       RESULT = el; :};
 
 ClassDeclarationList ::= 
-    {: RESULT = new ClassDeclList(0); :};
+    {: RESULT = new ClassDeclList(0); :}
     | ClassDeclaration:cd ClassDeclarationList:cdl 
-    {: RESULT = cdl;
-       RESULT.add(cd); :};
+    {: cdl.add(cd);
+       RESULT = cdl; :};
 
 MethodDeclarationList ::= 
-    {: RESULT = new MethodDeclList(0); :};
+    {: RESULT = new MethodDeclList(0); :}
     | MethodDeclaration:md MethodDeclarationList:mdl 
-    {: RESULT = mdl;
-       RESULT.add(md); :};
+    {: mdl.add(md);
+       RESULT = mdl; :};
 
 VarDeclarationList ::= 
-    {: RESULT = new VarDeclList(0); :};
+    {: RESULT = new VarDeclList(0); :}
     | VarDeclaration:vd VarDeclarationList:vdl 
-    {: RESULT = vdl;
-       RESULT.add(vd); :};
+    {: vdl.add(vd);
+       RESULT = vdl; :};
 
 StatementList ::= 
-    {: RESULT = new StatementList(0); :};
-    | statement:s StatementList:sl 
-    {: RESULT = sl;
-       RESULT.add(s); :};
+    {: RESULT = new StatementList(0); :}
+    | Statement:s StatementList:sl
+    {: sl.add(s);
+       RESULT = sl; :};
 
 FormalList ::= 
-    {: RESULT = new FormalList(0); :};
-    | Formal:f FormatList:fl 
-    {: RESULT = fl;
-       RESULT.add(f); :};
+    {: RESULT = new FormalList(0); :}
+    | Formal:f FormalList:fl
+    {: fl.add(f);
+       RESULT = fl; :};
 
 Formal ::= Type:t Identifier:id 
     {: RESULT = new Formal(t, id, txleft); :};
