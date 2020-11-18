@@ -9,12 +9,12 @@ public class MethodScope {
     public Map<String, String> methodVariables;
     public String methodType;
     // list tuple elements storing the name & type of argument.
-    public List arguments;
+    public List<ArgumentType> arguments;
 
     public MethodScope(String methodType) {
         this.methodType = methodType;
         methodVariables = new HashMap<>();
-        arguments = new ArrayList();
+        arguments = new ArrayList<ArgumentType>();
     }
 
     public void insertArgument(ArgumentType t) {
