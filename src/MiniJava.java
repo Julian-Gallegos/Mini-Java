@@ -2,6 +2,7 @@ import Scanner.*;
 import Parser.*;
 import AST.*;
 import AST.Visitor.*;
+import SemanticsAndTypes.GeneratorVisitor;
 import java_cup.runtime.Symbol;
 import java_cup.runtime.ComplexSymbolFactory;
 import java.io.*;
@@ -24,7 +25,11 @@ public class MiniJava {
                 System.exit(1); 
             }
             String option = args[0];
-            if (option.equals("-A")) {
+            if (option.equals("-T")) {
+                Program program = (Program) root.value;
+                GeneratorVisitor gv = new GeneratorVisitor(program);
+                gv.toString();
+            } else if (option.equals("-A")) {
                 @SuppressWarnings("unchecked")
                 Program program = (Program) root.value; 
                 program.accept(new ASTPrintVisitor());
