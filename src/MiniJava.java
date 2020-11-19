@@ -28,7 +28,7 @@ public class MiniJava {
             if (option.equals("-T")) {
                 Program program = (Program) root.value;
                 GeneratorVisitor gv = new GeneratorVisitor(program);
-                gv.toString();
+                System.out.println(gv.symbolTable.toString());
             } else if (option.equals("-A")) {
                 @SuppressWarnings("unchecked")
                 Program program = (Program) root.value; 
