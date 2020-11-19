@@ -3,6 +3,8 @@ package SemanticsAndTypes;
 import AST.*;
 import AST.Visitor.Visitor;
 
+import java.lang.reflect.Method;
+
 public class ErrorCheckVisitor implements Visitor {
 
     private int counter = 0;
@@ -27,7 +29,6 @@ public class ErrorCheckVisitor implements Visitor {
         System.out.println("Program");
         n.m.accept(this);
         for ( int i = 0; i < n.cl.size(); i++ ) {
-            System.out.println();
             n.cl.get(i).accept(this);
         }
     }
@@ -35,15 +36,8 @@ public class ErrorCheckVisitor implements Visitor {
     // Identifier i1,i2;
     // Statement s;
     public void visit(MainClass n) {
-        System.out.print("  MainClass ");
-        counter += 2;
         n.i1.accept(this);   // class name
-        System.out.println(" (line " + n.i1.line_number + ")");
-        //n.i2.accept(this);  // main method parameter
-        System.out.print("    ");
-        counter += 2;
         n.s.accept(this);  // main method body
-        counter -= 4;
     }
 
     // Identifier i;
@@ -184,11 +178,6 @@ public class ErrorCheckVisitor implements Visitor {
     // StatementList sl;
     public void visit(Block n) {
         for ( int i = 0; i < n.sl.size(); i++ ) {
-            if (i != 0) {
-                for (int j = 0; j < counter; j++) {
-                    System.out.print(" ");
-                }
-            }
             n.sl.get(i).accept(this);
             if(i+1 < n.sl.size()) {
                 System.out.println();
@@ -196,11 +185,122 @@ public class ErrorCheckVisitor implements Visitor {
         }
     }
 
+    private boolean isBooleanExpression(Exp e) {
+        if (e instanceof And) {
+            return isBooleanExpression(((And) e).e1)
+                    && isBooleanExpression(((And) e).e2);
+        } else if (e instanceof LessThan) {
+            return isArithmeticExpression(((LessThan) e).e1)
+                    && isArithmeticExpression(((LessThan) e).e2);
+        } else if (e instanceof Not) {
+            return isBooleanExpression(((Not) e).e);
+        } else if (e instanceof True) {
+            return true;
+        } else if (e instanceof False) {
+            return true;
+        } else if (e instanceof IdentifierExp) {
+            return isVariableDefined((IdentifierExp) e, "boolean");
+        } else if (e instanceof Call) {
+
+        }
+        return false;
+    }
+
+    public boolean isCall(Exp exp, ExpList expList) {
+        // TODO
+        if (exp instanceof Call) {
+            return isCall(((Call) exp).e, null);
+        }
+        return false;
+    }
+
+    private boolean isArithmeticExpression(Exp e) {
+        if (e instanceof Plus) {
+            return isArithmeticExpression(((Plus) e).e1)
+                    && isArithmeticExpression(((Plus) e).e2);
+        } else if (e instanceof Minus) {
+            return isArithmeticExpression(((Minus) e).e1)
+                    && isArithmeticExpression(((Minus) e).e2);
+        } else if (e instanceof Times) {
+            return isArithmeticExpression(((Times) e).e1)
+                    && isArithmeticExpression(((Times) e).e2);
+        } else if (e instanceof IntegerLiteral) {
+            return true;
+        } else if (e instanceof IdentifierExp) {
+            return isVariableDefined((IdentifierExp) e, "integer");
+        } else if (e instanceof Call) {
+
+        } else if (e instanceof ArrayLookup) {
+
+        } else if (e instanceof ArrayLength) {
+
+        }
+        return false;
+    }
+
+    private boolean isMethodDefined(Identifier id, ExpList expList) {
+        String methodName = id.s;
+        for (String c : symbolTable.globalScope.keySet()) {
+            ClassScope cs = symbolTable.getClassScope(c);
+            if (cs.methodMap.containsKey(methodName)) {
+                MethodScope ms = cs.getMethodScope(methodName);
+                for (int i = 0; i < ms.arguments.size(); i++) {
+                    ArgumentType at = ms.arguments.get(i);
+                    Exp exp = expList.get(i);
+                    // TODO
+                    // string, integer, boolean
+                    if (at.type.equals("integer")) {
+                        if (!isArithmeticExpression(exp)) {
+                            return false;
+                        }
+                    } else if (at.type.equals("boolean")) {
+                        if (!isBooleanExpression(exp)) {
+                            return false;
+                        }
+                    } else if (at.type.equals("intArray")) {
+
+                    } else {
+                        // TODO
+                        // identifer case
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    private boolean isVariableDefined(Exp e, String type) {
+        String id = ((IdentifierExp) e).s;
+        for (String c : symbolTable.globalScope.keySet()) {
+            ClassScope cs = symbolTable.getClassScope(c);
+            for (String m : cs.methodMap.keySet()) {
+                MethodScope ms = cs.getMethodScope(m);
+                for (ArgumentType at : ms.arguments) {
+                    if (at.name.equals(id)) {
+                        if (at.type.equals(type)) {
+                            return true;
+                        }
+                    }
+                }
+                if (ms.methodVariables.containsKey(id) && ms.methodVariables.get(id).equals(type)) {
+                    return true;
+                }
+            }
+            if (cs.variableMap.containsKey(id) && cs.variableMap.get(id).equals(type)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     // Exp e;
     // Statement s1,s2;
     public void visit(If n) {
         System.out.print("if ");
+
+
         n.e.accept(this);
+
         counter += 2;
         System.out.println();
         for(int i = 0; i < counter; i++) {
