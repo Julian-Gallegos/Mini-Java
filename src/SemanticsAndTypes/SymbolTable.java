@@ -34,13 +34,13 @@ public class SymbolTable {
         for (String className : globalScope.keySet()) {
             str += className + "\n";
             if (!globalScope.get(className).variableMap.isEmpty()) {
-                str += "\tVariable(s):\n"
+                str += "\tVariable(s):\n";
                 for (String variable : globalScope.get(className).variableMap.keySet()) {
                     str += "\tName: " + variable + ", Type: " + globalScope.get(className).variableMap.get(variable) + "\n";
                 }
             }
             if (!globalScope.get(className).methodMap.isEmpty()) {
-                str += "\tMethod(s):\n"
+                str += "\tMethod(s):\n";
                 for (String method : globalScope.get(className).methodMap.keySet()) {
                     str += "\tName: " + method + ", Return type: " + globalScope.get(className).methodMap.get(method).methodType + "\n";
                     if (!globalScope.get(className).methodMap.get(method).arguments.isEmpty()) {

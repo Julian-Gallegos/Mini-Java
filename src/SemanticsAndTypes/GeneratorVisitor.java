@@ -6,9 +6,12 @@ import AST.Visitor.Visitor;
 public class GeneratorVisitor implements Visitor {
 
     private int counter = 0;
+    public SymbolTable symbolTable;
 
-    public GeneratorVisitor() {
+    public GeneratorVisitor(Program root) {
         // TODO
+        symbolTable = new SymbolTable();
+        root.accept(this);
     }
 
     // Display added for toy example language.  Not used in regular MiniJava
@@ -34,6 +37,7 @@ public class GeneratorVisitor implements Visitor {
     public void visit(MainClass n) {
         System.out.print("  MainClass ");
         counter += 2;
+        symbolTable.putClass(n.i1.s, new ClassScope());
         n.i1.accept(this);   // class name
         System.out.println(" (line " + n.i1.line_number + ")");
         //n.i2.accept(this);  // main method parameter
@@ -48,7 +52,8 @@ public class GeneratorVisitor implements Visitor {
     // MethodDeclList ml;
     public void visit(ClassDeclSimple n) {
         System.out.print("  Class ");
-        n.i.accept(this);  // class name  + extends ...
+        symbolTable.putClass(n.i.s, new ClassScope());
+        n.i.accept(this);  // class name
         System.out.println(" (line " + n.i.line_number + ")");
         counter += 2;
         if (n.vl.size() > 0) {
@@ -80,6 +85,7 @@ public class GeneratorVisitor implements Visitor {
     public void visit(ClassDeclExtends n) {
         System.out.print("Class ");
         counter += 2;
+        symbolTable.putClass(n.i.s, new ClassScope());
         n.i.accept(this);
         System.out.print(" extends ");
         n.j.accept(this);

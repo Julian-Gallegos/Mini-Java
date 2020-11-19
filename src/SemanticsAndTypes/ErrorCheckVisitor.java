@@ -6,9 +6,12 @@ import AST.Visitor.Visitor;
 public class ErrorCheckVisitor implements Visitor {
 
     private int counter = 0;
+    public SymbolTable symbolTable;
 
-    public ErrorCheckVisitor() {
+    public ErrorCheckVisitor(Program root, SymbolTable st) {
         // TODO
+        symbolTable = st;
+        root.accept(this);
     }
 
     // Display added for toy example language.  Not used in regular MiniJava
