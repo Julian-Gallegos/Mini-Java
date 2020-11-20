@@ -208,18 +208,78 @@ public class ErrorCheckVisitor implements Visitor {
         return false;
     }
 
-    public boolean isCall(Exp exp, Identifier id, ExpList expList, String type) {
+    // assuming that it does exist in the symboltable
+    private String getMethodType(Identifier id) {
+        String methodName = id.s;
+        for (String c : symbolTable.globalScope.keySet()) {
+            ClassScope cs = symbolTable.getClassScope(c);
+            if (cs.methodMap.containsKey(methodName)) {
+                MethodScope ms = cs.getMethodScope(methodName);
+                for (int i = 0; i < ms.arguments.size(); i++) {
+                    ArgumentType at = ms.arguments.get(i);
+                    // TODO
+                    // string, integer, boolean
+                }
+            }
+        }
+        return "NULL";
+    }
+
+    private String getIdentiferInfo(Identifier id) {
+        String methodName = id.s;
+        for (String c : symbolTable.globalScope.keySet()) {
+            ClassScope cs = symbolTable.getClassScope(c);
+            if (cs.methodMap.containsKey(methodName)) {
+                MethodScope ms = cs.getMethodScope(methodName);
+                for (int i = 0; i < ms.arguments.size(); i++) {
+                    ArgumentType at = ms.arguments.get(i);
+                    // TODO
+                    // string, integer, boolean
+                }
+            }
+        }
+        return "NULL";
+    }
+
+    private boolean isCall(Exp exp, Identifier id, ExpList expList, String type) {
+        // check 'exp' recursively to make sure that it leads to a valid exp.
+        //      - could be an identifier
+        //      - nested exp. (ex. a.b.c.d)
+        // if its not valid return false, else..
+        // make sure that the id is a proper method of the class exp
+        // make sure that the return type of exp is a type class that can call id
+
+
+        // a.b(2,2)
+        if (isMethodDefined(id, expList, type)) {
+            // id exists of type 'type'
+
+        }
+
+        if (exp instanceof Call) {
+            // recursive shit
+        } else if (exp instanceof IdentifierExp) {
+            if (getIdentiferInfo()) {
+                if (!isVariableDefined(exp)) {
+
+                }
+            } else {
+                // id is not in symbol table
+                return false;
+            }
+        }
+        /*
         // TODO
         if (!isMethodDefined(id, expList, type)) {
             // TODO: some kind of printed error
             return false;
         }
-        if (exp instanceof Call) {
-            //String type = typeTable.getType((Call) exp).i
-            
+        else if (exp instanceof Call) {
+            //String type = typeTable.getType((Call) exp).
             return isCall(((Call) exp).e, ((Call) exp).i, ((Call) exp).el, );
         }
         return false;
+         */
     }
 
     private boolean isArithmeticExpression(Exp e) {
