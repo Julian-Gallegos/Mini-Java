@@ -209,38 +209,78 @@ public class ErrorCheckVisitor implements Visitor {
     }
 
     // assuming that it does exist in the symboltable
-    private String getMethodType(Identifier id) {
+    private String getMethodType(String classname, Identifier id, ExpList expList) {
         String methodName = id.s;
-        for (String c : symbolTable.globalScope.keySet()) {
-            ClassScope cs = symbolTable.getClassScope(c);
-            if (cs.methodMap.containsKey(methodName)) {
-                MethodScope ms = cs.getMethodScope(methodName);
-                for (int i = 0; i < ms.arguments.size(); i++) {
-                    ArgumentType at = ms.arguments.get(i);
-                    // TODO
-                    // string, integer, boolean
+        MethodScope ms = symbolTable.getClassScope(classname).getMethodScope(methodName);
+        for (int i = 0; i < ms.arguments.size(); i++) {
+            ArgumentType at = ms.arguments.get(i);
+            Exp exp = expList.get(i);
+            if (at.type.equals("integer")) {
+                if (!isArithmeticExpression(exp)) {
+                    // TODO: some kind of printed error about args not matching required types
+                    return null;
+                }
+            } else if (at.type.equals("boolean")) {
+                if (!isBooleanExpression(exp)) {
+                    // TODO: some kind of printed error
+                    return null;
+                }
+            } else if (at.type.equals("intArray")) {
+                if (exp instanceof Call) {
+                    if(!isCall(((Call) exp).e, ((Call) exp).i, ((Call) exp).el, "intArray")) {
+                        return null;
+                    }
+                } else if(exp instanceof IdentifierExp) {
+                    if(!isVariableDefined((IdentifierExp) exp, "intArray")) {
+                        return null;
+                    }
+                } else {
+                    // TODO: some kind of printed error
+                    return null;
+                }
+            } else if (at.type.equals(typeTable.getType(at.type))) {
+                // identifer case
+                if (exp instanceof Call) {
+                    if (!isCall(((Call) exp).e, ((Call) exp).i, ((Call) exp).el, at.type)) {
+                        return null;
+                    }
+                } else if(exp instanceof IdentifierExp) {
+                    if (!isVariableDefined((IdentifierExp) exp, at.type)) {
+                        return null;
+                    }
+                } else {
+                    // TODO: some kind of printed error
+                    return null;
                 }
             }
         }
-        return "NULL";
+        return ms.methodType;
     }
 
-    private String getIdentiferInfo(Identifier id) {
-        String methodName = id.s;
-        for (String c : symbolTable.globalScope.keySet()) {
-            ClassScope cs = symbolTable.getClassScope(c);
-            if (cs.methodMap.containsKey(methodName)) {
-                MethodScope ms = cs.getMethodScope(methodName);
-                for (int i = 0; i < ms.arguments.size(); i++) {
-                    ArgumentType at = ms.arguments.get(i);
-                    // TODO
-                    // string, integer, boolean
-                }
+    private String isCallHelper(Exp exp, Identifier id, ExpList expList) {
+        if (exp instanceof Call) {
+            // recursive shit
+            String classname = isCallHelper(((Call)exp).e,((Call)exp).i,((Call)exp).el);
+            if (!symbolTable.getClassScope(classname).methodMap.containsKey(id.s)) {
+                //TODO: error
+                return null;
             }
-        }
-        return "NULL";
-    }
+            return getMethodType(classname, id, expList);
+        } else if (exp instanceof IdentifierExp) {
+            if (typeTable.types.containsKey(((IdentifierExp)exp).s)) {
+                //TODO: error classname does not exist in scope
+                return null;
+            }
+            if (!symbolTable.getClassScope(((IdentifierExp)exp).s).methodMap.containsKey(id.s)) {
+                //TODO: error
+                return null;
+            }
+            return getMethodType(((IdentifierExp)exp).s, id, expList);
 
+        }
+        // Should never this as parser would already complain.
+        return null;
+    }
     private boolean isCall(Exp exp, Identifier id, ExpList expList, String type) {
         // check 'exp' recursively to make sure that it leads to a valid exp.
         //      - could be an identifier
@@ -251,35 +291,30 @@ public class ErrorCheckVisitor implements Visitor {
 
 
         // a.b(2,2)
-        if (isMethodDefined(id, expList, type)) {
-            // id exists of type 'type'
-
-        }
-
         if (exp instanceof Call) {
-            // recursive shit
-        } else if (exp instanceof IdentifierExp) {
-            if (getIdentiferInfo()) {
-                if (!isVariableDefined(exp)) {
-
-                }
-            } else {
-                // id is not in symbol table
+            String classname = isCallHelper(exp, id, expList);
+            if (classname == null) {
+                //TODO: PRINT ERROR
                 return false;
             }
-        }
-        /*
-        // TODO
-        if (!isMethodDefined(id, expList, type)) {
-            // TODO: some kind of printed error
-            return false;
-        }
-        else if (exp instanceof Call) {
-            //String type = typeTable.getType((Call) exp).
-            return isCall(((Call) exp).e, ((Call) exp).i, ((Call) exp).el, );
+            if (!symbolTable.getClassScope(classname).methodMap.containsKey(id.s)) {
+                //TODO: PRINT ERROR
+                return false;
+            }
+            return isMethodDefined(classname, id, expList, type);
+        } else if (exp instanceof IdentifierExp) {
+            if (typeTable.types.containsKey(((IdentifierExp)exp).s)) {
+                //TODO: error classname does not exist in scope
+                return false;
+            }
+            if (!symbolTable.getClassScope(((IdentifierExp)exp).s).methodMap.containsKey(id.s)) {
+                //TODO: PRINT ERROR
+                return false;
+            }
+            return isMethodDefined(((IdentifierExp)exp).s, id, expList, type);
+
         }
         return false;
-         */
     }
 
     private boolean isArithmeticExpression(Exp e) {
@@ -306,7 +341,7 @@ public class ErrorCheckVisitor implements Visitor {
         return false;
     }
 
-    private boolean isMethodDefined(Identifier id, ExpList expList, String type) {
+    private boolean isMethodDefined(String classname, Identifier id, ExpList expList, String type) {
         String methodName = id.s;
         for (String c : symbolTable.globalScope.keySet()) {
             ClassScope cs = symbolTable.getClassScope(c);
@@ -364,26 +399,24 @@ public class ErrorCheckVisitor implements Visitor {
         return true;
     }
 
-    private boolean isVariableDefined(Exp e, String type) {
+    private boolean isVariableDefined(String classname, String methodname, Exp e, String type) {
         String id = ((IdentifierExp) e).s;
-        for (String c : symbolTable.globalScope.keySet()) {
-            ClassScope cs = symbolTable.getClassScope(c);
-            for (String m : cs.methodMap.keySet()) {
-                MethodScope ms = cs.getMethodScope(m);
-                for (ArgumentType at : ms.arguments) {
-                    if (at.name.equals(id)) {
-                        if (at.type.equals(type)) {
-                            return true;
-                        }
-                    }
-                }
-                if (ms.methodVariables.containsKey(id) && ms.methodVariables.get(id).equals(type)) {
+        ClassScope cs = symbolTable.getClassScope(c);
+
+        MethodScope ms = cs.getMethodScope(m);
+        for (ArgumentType at : ms.arguments) {
+            if (at.name.equals(id)) {
+                if (at.type.equals(type)) {
                     return true;
                 }
             }
-            if (cs.variableMap.containsKey(id) && cs.variableMap.get(id).equals(type)) {
-                return true;
-            }
+        }
+        if (ms.methodVariables.containsKey(id) && ms.methodVariables.get(id).equals(type)) {
+            return true;
+        }
+
+        if (cs.variableMap.containsKey(id) && cs.variableMap.get(id).equals(type)) {
+            return true;
         }
         return false;
     }
