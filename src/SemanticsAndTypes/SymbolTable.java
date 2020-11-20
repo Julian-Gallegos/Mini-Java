@@ -9,6 +9,9 @@ public class SymbolTable {
 
     public SymbolTable() {
         globalScope = new HashMap<>();
+        //ClassScope length = new ClassScope();
+        //length.putMethod("length", new MethodScope("integer"));
+        //globalScope.put("intArray", length);
     }
 
     public boolean putClass(String className, ClassScope classScope) {

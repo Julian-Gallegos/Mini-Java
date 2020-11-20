@@ -175,22 +175,22 @@ public class ErrorCheckVisitor implements Visitor {
         } else if (e instanceof ArrayLookup) {
             if (((ArrayLookup) e).e1 instanceof Call) {
                 Call c = ((Call) ((ArrayLookup) e).e1);
-                return isCall(c.e, c.i, c.el, "integer")
-                        && arrayLookupCallHelper(((ArrayLookup) e).e2);
+                return isCall(c.e, c.i, c.el, "intArray")
+                        && isArithmeticExpression(((ArrayLookup) e).e2);
             } else if (((ArrayLookup) e).e1 instanceof IdentifierExp) {
                 IdentifierExp ie = ((IdentifierExp) ((ArrayLookup) e).e1);
-                return isVariableDefined(currentClass, currentMethod, ie, "integer")
-                        && arrayLookupCallHelper(((ArrayLookup) e).e2);
+                return isVariableDefined(currentClass, currentMethod, ie, "intArray")
+                        && isArithmeticExpression(((ArrayLookup) e).e2);
             }
             return false;
         } else if (e instanceof ArrayLength) {
             // a . length
             if (((ArrayLength) e).e instanceof Call) {
                 Call c = ((Call) ((ArrayLength) e).e);
-                return isCall(c.e, c.i, c.el, "integer");
+                return isCall(c.e, c.i, c.el, "intArray");
             } else if (((ArrayLength) e).e instanceof IdentifierExp) {
                 IdentifierExp ie = ((IdentifierExp) ((ArrayLength) e).e);
-                return isVariableDefined(currentClass, currentMethod, ie, "integer");
+                return isVariableDefined(currentClass, currentMethod, ie, "intArray");
             }
             return false;
         }
@@ -483,18 +483,18 @@ public class ErrorCheckVisitor implements Visitor {
             return isBooleanExpression(exp);
         } else if (type.equals("integer")) {
             return isArithmeticExpression(exp);
-        } else if (type.equals(typeTable.getType(type))) {
-            if (exp instanceof Call) {
-                return isCall(((Call) exp).e, ((Call) exp).i, ((Call) exp).el, type);
-            } else if (exp instanceof IdentifierExp) {
-                return isDerived(type, lookupTypeForID(((IdentifierExp) exp).s));
-            }
-            return false;
         } else if (type.equals("intArray")) {
             if (exp instanceof Call) {
                 return isCall(((Call) exp).e, ((Call) exp).i, ((Call) exp).el, type);
             } else if(exp instanceof IdentifierExp) {
                 return isVariableDefined(currentClass, currentMethod, (IdentifierExp) exp, type);
+            }
+            return false;
+        } else if (type.equals(typeTable.getType(type))) {
+            if (exp instanceof Call) {
+                return isCall(((Call) exp).e, ((Call) exp).i, ((Call) exp).el, type);
+            } else if (exp instanceof IdentifierExp) {
+                return isDerived(type, lookupTypeForID(((IdentifierExp) exp).s));
             }
             return false;
         }
@@ -625,22 +625,22 @@ public class ErrorCheckVisitor implements Visitor {
     private boolean isArrayLength(Exp exp) {
         if (exp instanceof Call) {
             Call c = ((Call) exp);
-            return isCall(c.e, c.i, c.el, "integer");
+            return isCall(c.e, c.i, c.el, "intArray");
         } else if (exp instanceof IdentifierExp) {
             IdentifierExp ie = ((IdentifierExp) exp);
-            return isVariableDefined(currentClass, currentMethod, ie, "integer");
+            return isVariableDefined(currentClass, currentMethod, ie, "intArray");
         }
         return false;
     }
     private boolean isArray(ArrayLookup arr) {
         if (arr.e1 instanceof Call) {
             Call c = ((Call) arr.e1);
-            return isCall(c.e, c.i, c.el, "integer")
-                    && arrayLookupCallHelper(arr.e2);
+            return isCall(c.e, c.i, c.el, "intArray")
+                    && isArithmeticExpression(arr.e2);
         } else if (arr.e1 instanceof IdentifierExp) {
             IdentifierExp ie = ((IdentifierExp) arr.e1);
-            return isVariableDefined(currentClass, currentMethod, ie, "integer")
-                    && arrayLookupCallHelper(arr.e2);
+            return isVariableDefined(currentClass, currentMethod, ie, "intArray")
+                    && isArithmeticExpression(arr.e2);
         }
         return false;
     }

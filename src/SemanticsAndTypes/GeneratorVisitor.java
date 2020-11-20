@@ -41,7 +41,7 @@ public class GeneratorVisitor implements Visitor {
     // MethodDeclList ml;
     public void visit(ClassDeclSimple n) {
         symbolTable.putClass(n.i.s, new ClassScope());
-        typeTable.putType(n.i.s, "void"); // If class does not extend anything, set value as void.
+        typeTable.putType(n.i.s, null); // If class does not extend anything, set value as void.
         n.i.accept(this);  // class name
         for ( int i = 0; i < n.vl.size(); i++ ) {
             String variable = n.vl.get(i).i.s;

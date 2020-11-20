@@ -9,6 +9,9 @@ public class TypeTable {
 
     public TypeTable() {
         types = new HashMap<>();
+        types.put("intArray", null);
+        types.put("integer", null);
+        types.put("boolean", null);
     }
 
     public boolean putType(String typeName, String extendType) {
