@@ -47,7 +47,7 @@ public class ErrorCheckVisitor implements Visitor {
     // MethodDeclList ml;
     public void visit(ClassDeclSimple n) {
         currentClass = n.i.s;  // TAG
-        n.i.accept(this);  // class name  + extends ...
+        n.i.accept(this);  // class name
 
         for ( int i = 0; i < n.vl.size(); i++ ) {
             n.vl.get(i).accept(this);
@@ -64,14 +64,30 @@ public class ErrorCheckVisitor implements Visitor {
     // MethodDeclList ml;
     public void visit(ClassDeclExtends n) {
         currentClass = n.i.s;  // TAG
-        n.i.accept(this);
-        n.j.accept(this);
+        n.i.accept(this); // class name
+        n.j.accept(this); // extend class name
 
         for ( int i = 0; i < n.vl.size(); i++ ) {
             n.vl.get(i).accept(this);
         }
         for ( int i = 0; i < n.ml.size(); i++ ) {
             currentMethod = n.ml.get(i).i.s;  // TAG
+            if (symbolTable.getClassScope(n.j.s).methodMap.containsKey(currentMethod)) {
+                if (isDerived(symbolTable.getClassScope(n.j.s).getMethodScope(currentMethod).methodType, symbolTable.getClassScope(currentClass).getMethodScope(currentMethod).methodType)) {
+                    for (int j = 0; j < n.ml.get(i).fl.size(); j++) {
+                        Type t = n.ml.get(i).fl.get(i).t;
+                        String superType = symbolTable.getClassScope(n.j.s).getMethodScope(currentMethod).arguments.get(j).type;
+                        if (!((       t instanceof BooleanType && superType.equals("boolean"))
+                                || (t instanceof IntegerType && superType.equals("integer"))
+                                || (t instanceof IntArrayType && superType.equals("intArray"))
+                                || (t instanceof IdentifierType && superType.equals(((IdentifierType)t).s)))) {
+                            System.out.println("Error (line " + n.ml.get(i).line_number + ") override method argument types do not match");
+                        }
+                    }
+                } else {
+                    System.out.println("Error (line " + n.ml.get(i).line_number + ") override method return type does not match");
+                }
+            }
             n.ml.get(i).accept(this);
         }
     }
@@ -249,7 +265,7 @@ public class ErrorCheckVisitor implements Visitor {
                     return null;
                 }
             } else if (at.type.equals(typeTable.getType(at.type))) {
-                // identifer case
+                // identifier case
                 if (exp instanceof Call) {
                     if (!isCall(((Call) exp).e, ((Call) exp).i, ((Call) exp).el, at.type)) {
                         return null;
@@ -361,8 +377,10 @@ public class ErrorCheckVisitor implements Visitor {
         ClassScope cs = symbolTable.getClassScope(className);
         if (cs.methodMap.containsKey(methodName)) {
             MethodScope ms = cs.getMethodScope(methodName);
-            if (!ms.methodType.equals(type)) {
+
+            if (!isDerived(type, ms.methodType)) {
                 // TODO: error for method type mismatch
+                System.out.println("Error (line " + id.line_number + ") method return type invalid");
                 return false;
             }
             if (ms.arguments.size() != expList.size()) {
@@ -394,7 +412,7 @@ public class ErrorCheckVisitor implements Visitor {
                         return false;
                     }
                 } else if (at.type.equals(typeTable.getType(at.type))) {
-                    // identifer case
+                    // identifier case
                     if (exp instanceof Call) {
                         return isCall(((Call) exp).e, ((Call) exp).i, ((Call) exp).el, at.type);
                     } else if(exp instanceof IdentifierExp) {
@@ -415,19 +433,18 @@ public class ErrorCheckVisitor implements Visitor {
     private boolean isVariableDefined(String className, String methodName, Exp e, String type) {
         String id = ((IdentifierExp) e).s;
         ClassScope cs = symbolTable.getClassScope(className);
-
         MethodScope ms = cs.getMethodScope(methodName);
         for (ArgumentType at : ms.arguments) {
             if (at.name.equals(id)) {
-                if (at.type.equals(type)) {
+                if (isDerived(type, at.type)) {
                     return true;
                 }
             }
         }
-        if (ms.methodVariables.containsKey(id) && ms.methodVariables.get(id).equals(type)) {
+        if (ms.methodVariables.containsKey(id) && isDerived(type, ms.methodVariables.get(id))) {
             return true;
         }
-        if (cs.variableMap.containsKey(id) && cs.variableMap.get(id).equals(type)) {
+        if (cs.variableMap.containsKey(id) && isDerived(type, cs.variableMap.get(id))) {
             return true;
         }
         return false;
