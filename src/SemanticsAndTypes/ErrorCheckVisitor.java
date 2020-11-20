@@ -5,6 +5,8 @@ import AST.Visitor.Visitor;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
+import java.util.HashSet;
+import java.util.Set;
 
 public class ErrorCheckVisitor implements Visitor {
 
@@ -65,6 +67,10 @@ public class ErrorCheckVisitor implements Visitor {
     public void visit(ClassDeclExtends n) {
         currentClass = n.i.s;  // TAG
         n.i.accept(this); // class name
+        if (!checkLoopInheritance(n.i.s, new HashSet<String>())) {
+            // if loop encountered, abandon ship
+            System.exit(1);
+        }
         n.j.accept(this); // extend class name
 
         for ( int i = 0; i < n.vl.size(); i++ ) {
@@ -358,20 +364,6 @@ public class ErrorCheckVisitor implements Visitor {
         return false;
     }
 
-    private boolean isExtendedFrom(String className, String methodName) {
-        if (!symbolTable.getClassScope(className).methodMap.containsKey(methodName)) {
-            // check for extended class
-            String extendedClass = typeTable.getType(className);
-            if (extendedClass != null) {
-                return isExtendedFrom(extendedClass, methodName);
-            } else {
-                // no extended class
-                return false;
-            }
-        }
-        return true;
-    }
-
     private boolean isMethodDefined(String className, Identifier id, ExpList expList, String type) {
         String methodName = id.s;
         ClassScope cs = symbolTable.getClassScope(className);
@@ -531,6 +523,39 @@ public class ErrorCheckVisitor implements Visitor {
             return isDerived(leftAssign, superType);
         }
         return false;
+    }
+
+    // ...
+    private boolean isExtendedFrom(String className, String methodName) {
+        if (!symbolTable.getClassScope(className).methodMap.containsKey(methodName)) {
+            // check for extended class
+            String extendedClass = typeTable.getType(className);
+            if (extendedClass != null) {
+                return isExtendedFrom(extendedClass, methodName);
+            } else {
+                // no extended class
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean checkLoopInheritance(String className, Set<String> visitedClasses) {
+        if (visitedClasses.contains(className)) {
+            // already visited this class
+            System.out.println("Error: Class inheritance loop detected with " + className);
+            return false;
+        } else {
+            visitedClasses.add(className);
+        }
+        // check for extended class
+        String extendedClass = typeTable.getType(className);
+        if (extendedClass != null) {
+            return checkLoopInheritance(extendedClass, visitedClasses);
+        } else {
+            // no extended class
+            return true;
+        }
     }
 
     // Identifier i;
