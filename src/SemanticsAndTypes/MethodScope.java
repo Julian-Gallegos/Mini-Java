@@ -28,10 +28,20 @@ public class MethodScope {
 
     public String getVariableType(String variableName) {
         if (!methodVariables.containsKey(variableName)) {
-            System.out.println("Error: Variable name " + variableName + " not defined.");
-            System.exit(1);
+            //System.out.println("Error: Variable name " + variableName + " not defined.");
+            // System.exit(1);
+            return null;
         }
         return methodVariables.get(variableName);
+    }
+
+    public String getParameterType(String name) {
+        for (ArgumentType t : arguments) {
+            if (t.name.equals(name)) {
+                return t.type;
+            }
+        }
+        return null;
     }
 
     @Override

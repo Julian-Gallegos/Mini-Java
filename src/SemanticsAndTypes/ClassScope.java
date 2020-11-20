@@ -35,7 +35,7 @@ public class ClassScope {
     }
 
     public String getVariableType(String variableName) {
-        if (!methodMap.containsKey(variableName)) {
+        if (!variableMap.containsKey(variableName)) {
             System.out.println("Error: Variable name " + variableName + " not defined.");
             System.exit(1);
         }

@@ -68,7 +68,7 @@ public class GeneratorVisitor implements Visitor {
         }
     }
 
-    private String getType(Type t) {
+    public String getType(Type t) {
         if (t instanceof BooleanType) {
             return "boolean";
         } else if (t instanceof IdentifierType) {

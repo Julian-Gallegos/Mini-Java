@@ -22,8 +22,8 @@ public class SymbolTable {
 
     public ClassScope getClassScope(String className) {
         if (!globalScope.containsKey(className)) {
-            System.out.println("Error: Class name " + className + " not defined.");
-            System.exit(1);
+            //System.out.println("Error: Class name " + className + " not defined.");
+            return null;
         }
         return globalScope.get(className);
     }
