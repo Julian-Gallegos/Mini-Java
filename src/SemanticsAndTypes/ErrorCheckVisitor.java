@@ -114,7 +114,6 @@ public class ErrorCheckVisitor implements Visitor {
     public void visit(MethodDecl n) {
         currentMethod = n.i.s;  // TAG
         n.i.accept(this);   // method name
-        System.out.print("      returns ");
         // TODO
         // maybe check the return type of method
         n.t.accept(this);   // return type
@@ -138,29 +137,22 @@ public class ErrorCheckVisitor implements Visitor {
     }
 
     public void visit(IntArrayType n) {
-        System.out.print("int []");
     }
 
     public void visit(BooleanType n) {
-        System.out.print("boolean");
     }
 
     public void visit(IntegerType n) {
-        System.out.print("int");
     }
 
     // String s;
     public void visit(IdentifierType n) {
-        System.out.print(n.s);
     }
 
     // StatementList sl;
     public void visit(Block n) {
         for ( int i = 0; i < n.sl.size(); i++ ) {
             n.sl.get(i).accept(this);
-            if(i+1 < n.sl.size()) {
-                System.out.println();
-            }
         }
     }
 
@@ -201,20 +193,6 @@ public class ErrorCheckVisitor implements Visitor {
                 return isVariableDefined(currentClass, currentMethod, ie, "integer");
             }
             return false;
-        }
-        return false;
-    }
-
-    private boolean arrayLookupCallHelper(Exp exp) {
-        // a    [0]
-        // - call, id    - call, id, integer
-        if (exp instanceof Call) {
-            Call c = (Call) exp;
-            return isCall(c.e, c.i, c.el, "integer");
-        } else if (exp instanceof IntegerLiteral) {
-            return true;
-        } else if (exp instanceof IdentifierExp) {
-            return isVariableDefined(currentClass, currentMethod, exp, "integer");
         }
         return false;
     }
@@ -293,7 +271,7 @@ public class ErrorCheckVisitor implements Visitor {
         if (exp instanceof Call) {
             // recursive shit
             String classname = isCallHelper(((Call)exp).e,((Call)exp).i,((Call)exp).el);
-            if (!isExtendedFrom(classname, id.s)) {
+            if (classname == null || !isExtendedFrom(classname, id.s)) {
                 return null;
             }
             /*
@@ -319,6 +297,11 @@ public class ErrorCheckVisitor implements Visitor {
              */
             return getMethodType(((IdentifierExp)exp).s, id, expList);
 
+        } else if (exp instanceof This) {
+            if (!isExtendedFrom(currentClass, id.s)) {
+                return null;
+            }
+            return getMethodType(currentClass, id, expList);
         }
         // Should never this as parser would already complain.
         return null;
@@ -360,6 +343,11 @@ public class ErrorCheckVisitor implements Visitor {
             }
             return isMethodDefined(((IdentifierExp)exp).s, id, expList, type);
 
+        } else if (exp instanceof This) {
+            if (!isExtendedFrom(currentClass, id.s)) {
+                return false;
+            }
+            return isMethodDefined(currentClass, id, expList, type);
         }
         return false;
     }
@@ -617,11 +605,10 @@ public class ErrorCheckVisitor implements Visitor {
 
     // Exp e1,e2;
     public void visit(ArrayLookup n) {
-        n.e1.accept(this);
-
-        if (!isArray(n.e1)) {
-            System.out.println("Error: (line " + n.e2.line_number + ") array described is not valid");
+        if (!isArray(n)) {
+            System.out.println("Error: (line " + n.e1.line_number + ") array described is not valid");
         }
+        n.e1.accept(this);
         if (!isArithmeticExpression(n.e2)) {
             System.out.println("Error: (line " + n.e2.line_number + ") expression in bracket is not of integer type");
         }
@@ -630,21 +617,44 @@ public class ErrorCheckVisitor implements Visitor {
 
     // Exp e;
     public void visit(ArrayLength n) {
-        n.e.accept(this);
-        if (!isArray(n.e)) {
+        if (!isArrayLength(n.e)) {
             System.out.println("Error: (line " + n.e.line_number + ") array described is not valid");
         }
+        n.e.accept(this);
+    }
+    private boolean isArrayLength(Exp exp) {
+        if (exp instanceof Call) {
+            Call c = ((Call) exp);
+            return isCall(c.e, c.i, c.el, "integer");
+        } else if (exp instanceof IdentifierExp) {
+            IdentifierExp ie = ((IdentifierExp) exp);
+            return isVariableDefined(currentClass, currentMethod, ie, "integer");
+        }
+        return false;
+    }
+    private boolean isArray(ArrayLookup arr) {
+        if (arr.e1 instanceof Call) {
+            Call c = ((Call) arr.e1);
+            return isCall(c.e, c.i, c.el, "integer")
+                    && arrayLookupCallHelper(arr.e2);
+        } else if (arr.e1 instanceof IdentifierExp) {
+            IdentifierExp ie = ((IdentifierExp) arr.e1);
+            return isVariableDefined(currentClass, currentMethod, ie, "integer")
+                    && arrayLookupCallHelper(arr.e2);
+        }
+        return false;
     }
 
-    private boolean isArray(Exp exp) {
-        if (((ArrayLookup) exp).e1 instanceof Call) {
-            Call c = ((Call) ((ArrayLookup) exp).e1);
-            return isCall(c.e, c.i, c.el, "integer")
-                    && arrayLookupCallHelper(((ArrayLookup) exp).e2);
-        } else if (((ArrayLookup) exp).e1 instanceof IdentifierExp) {
-            IdentifierExp ie = ((IdentifierExp) ((ArrayLookup) exp).e1);
-            return isVariableDefined(currentClass, currentMethod, ie, "integer")
-                    && arrayLookupCallHelper(((ArrayLookup) exp).e2);
+    private boolean arrayLookupCallHelper(Exp exp) {
+        // a    [0]
+        // - call, id    - call, id, integer
+        if (exp instanceof Call) {
+            Call c = (Call) exp;
+            return isCall(c.e, c.i, c.el, "integer");
+        } else if (exp instanceof IntegerLiteral) {
+            return true;
+        } else if (exp instanceof IdentifierExp) {
+            return isVariableDefined(currentClass, currentMethod, exp, "integer");
         }
         return false;
     }
@@ -690,11 +700,9 @@ public class ErrorCheckVisitor implements Visitor {
 
     // Identifier i;
     public void visit(NewObject n) {
-        System.out.print("new ");
         if (symbolTable.getClassScope(n.i.s) == null) {
             System.out.println("Error (line " + n.i.line_number + ") class not found");
         }
-        System.out.print(n.i.s);
     }
 
     // Exp e;
