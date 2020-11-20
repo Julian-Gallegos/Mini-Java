@@ -29,7 +29,7 @@ public class MiniJava {
             if (option.equals("-T")) {
                 Program program = (Program) root.value;
                 GeneratorVisitor gv = new GeneratorVisitor(program);
-                ErrorCheckVisitor ecv = new ErrorCheckVisitor(program, gv.symbolTable);
+                ErrorCheckVisitor ecv = new ErrorCheckVisitor(program, gv.symbolTable, gv.typeTable);
                 //System.out.println(gv.symbolTable.toString());
             } else if (option.equals("-A")) {
                 @SuppressWarnings("unchecked")

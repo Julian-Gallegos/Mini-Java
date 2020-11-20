@@ -5,10 +5,12 @@ import AST.Visitor.Visitor;
 
 public class GeneratorVisitor implements Visitor {
     public SymbolTable symbolTable;
+    public TypeTable typeTable;
 
     public GeneratorVisitor(Program root) {
         // TODO
         symbolTable = new SymbolTable();
+        typeTable = new TypeTable();
         root.accept(this);
     }
 
@@ -39,6 +41,7 @@ public class GeneratorVisitor implements Visitor {
     // MethodDeclList ml;
     public void visit(ClassDeclSimple n) {
         symbolTable.putClass(n.i.s, new ClassScope());
+        typeTable.putType(n.i.s, "void"); // If class does not extend anything, set value as void.
         n.i.accept(this);  // class name
         for ( int i = 0; i < n.vl.size(); i++ ) {
             String variable = n.vl.get(i).i.s;
@@ -84,6 +87,7 @@ public class GeneratorVisitor implements Visitor {
     // MethodDeclList ml;
     public void visit(ClassDeclExtends n) {
         symbolTable.putClass(n.i.s, new ClassScope());
+        typeTable.putType(n.i.s, n.j.s);
         n.i.accept(this);
         n.j.accept(this);
         for ( int i = 0; i < n.vl.size(); i++ ) {

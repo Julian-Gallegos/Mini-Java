@@ -9,10 +9,12 @@ public class ErrorCheckVisitor implements Visitor {
 
     private int counter = 0;
     public SymbolTable symbolTable;
+    public TypeTable typeTable;
 
-    public ErrorCheckVisitor(Program root, SymbolTable st) {
+    public ErrorCheckVisitor(Program root, SymbolTable st, TypeTable tt) {
         // TODO
         symbolTable = st;
+        typeTable = tt;
         root.accept(this);
     }
 
@@ -201,15 +203,21 @@ public class ErrorCheckVisitor implements Visitor {
         } else if (e instanceof IdentifierExp) {
             return isVariableDefined((IdentifierExp) e, "boolean");
         } else if (e instanceof Call) {
-
+            return isCall(((Call)e).e, ((Call)e).i, ((Call)e).el, "boolean");
         }
         return false;
     }
 
-    public boolean isCall(Exp exp, ExpList expList) {
+    public boolean isCall(Exp exp, Identifier id, ExpList expList, String type) {
         // TODO
+        if (!isMethodDefined(id, expList, type)) {
+            // TODO: some kind of printed error
+            return false;
+        }
         if (exp instanceof Call) {
-            return isCall(((Call) exp).e, null);
+            //String type = typeTable.getType((Call) exp).i
+            
+            return isCall(((Call) exp).e, ((Call) exp).i, ((Call) exp).el, );
         }
         return false;
     }
@@ -238,12 +246,20 @@ public class ErrorCheckVisitor implements Visitor {
         return false;
     }
 
-    private boolean isMethodDefined(Identifier id, ExpList expList) {
+    private boolean isMethodDefined(Identifier id, ExpList expList, String type) {
         String methodName = id.s;
         for (String c : symbolTable.globalScope.keySet()) {
             ClassScope cs = symbolTable.getClassScope(c);
             if (cs.methodMap.containsKey(methodName)) {
                 MethodScope ms = cs.getMethodScope(methodName);
+                if (!ms.methodType.equals(type)) {
+                    // TODO: error for method type mismatch
+                    return false;
+                }
+                if (ms.arguments.size() != expList.size()) {
+                    // TODO: some kind of printed error to describe provided method arguments mismatch
+                    return false;
+                }
                 for (int i = 0; i < ms.arguments.size(); i++) {
                     ArgumentType at = ms.arguments.get(i);
                     Exp exp = expList.get(i);
@@ -251,19 +267,38 @@ public class ErrorCheckVisitor implements Visitor {
                     // string, integer, boolean
                     if (at.type.equals("integer")) {
                         if (!isArithmeticExpression(exp)) {
+                            // TODO: some kind of printed error
                             return false;
                         }
                     } else if (at.type.equals("boolean")) {
                         if (!isBooleanExpression(exp)) {
+                            // TODO: some kind of printed error
                             return false;
                         }
                     } else if (at.type.equals("intArray")) {
-
-                    } else {
-                        // TODO
+                        if (exp instanceof Call) {
+                            return isCall(((Call) exp).e, ((Call) exp).i, ((Call) exp).el, "intArray");
+                        } else if(exp instanceof IdentifierExp) {
+                            return isVariableDefined((IdentifierExp) exp, "intArray");
+                        } else {
+                            // TODO: some kind of printed error
+                            return false;
+                        }
+                    } else if (at.type.equals(typeTable.getType(at.type))) {
                         // identifer case
+                        if (exp instanceof Call) {
+                            return isCall(((Call) exp).e, ((Call) exp).i, ((Call) exp).el, at.type);
+                        } else if(exp instanceof IdentifierExp) {
+                            return isVariableDefined((IdentifierExp) exp, at.type);
+                        } else {
+                            // TODO: some kind of printed error
+                            return false;
+                        }
                     }
                 }
+            } else {
+                // TODO: system.exit maybe, or print error about undefined method and return false.
+                return false;
             }
         }
         return true;
@@ -298,7 +333,7 @@ public class ErrorCheckVisitor implements Visitor {
     public void visit(If n) {
         System.out.print("if ");
 
-
+        isBooleanExpression(n.e);
         n.e.accept(this);
 
         counter += 2;
