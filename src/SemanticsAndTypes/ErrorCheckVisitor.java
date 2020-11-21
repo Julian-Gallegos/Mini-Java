@@ -302,6 +302,17 @@ public class ErrorCheckVisitor implements Visitor {
                 return null;
             }
             return getMethodType(currentClass, id, expList);
+        } else if (exp instanceof NewObject) {
+            if(typeTable.types.containsKey(((NewObject) exp).i)) {
+                return null;
+            }
+            return getMethodType(((NewObject) exp).i.s, id, expList);
+        } else if (exp instanceof NewArray) {
+            // MiniJava array only has the .length field.
+            if (!isArithmeticExpression(((NewArray) exp).e) || !id.s.equals("length")) {
+                return null;
+            }
+            return "integer";
         }
         // Should never this as parser would already complain.
         return null;
@@ -348,6 +359,14 @@ public class ErrorCheckVisitor implements Visitor {
                 return false;
             }
             return isMethodDefined(currentClass, id, expList, type);
+        } else if (exp instanceof NewObject) {
+            if(typeTable.types.containsKey(((NewObject) exp).i)) {
+                return false;
+            }
+            return isMethodDefined(((NewObject) exp).i.s, id, expList, type);
+        } else if (exp instanceof NewArray) {
+            // MiniJava array only has the .length field.
+            return isArithmeticExpression(((NewArray) exp).e) && id.s.equals("length");
         }
         return false;
     }
@@ -486,8 +505,10 @@ public class ErrorCheckVisitor implements Visitor {
         } else if (type.equals("intArray")) {
             if (exp instanceof Call) {
                 return isCall(((Call) exp).e, ((Call) exp).i, ((Call) exp).el, type);
-            } else if(exp instanceof IdentifierExp) {
+            } else if (exp instanceof IdentifierExp) {
                 return isVariableDefined(currentClass, currentMethod, (IdentifierExp) exp, type);
+            } else if (exp instanceof NewArray) {
+                return isArithmeticExpression(((NewArray) exp).e);
             }
             return false;
         } else if (type.equals(typeTable.getType(type))) {
@@ -495,6 +516,8 @@ public class ErrorCheckVisitor implements Visitor {
                 return isCall(((Call) exp).e, ((Call) exp).i, ((Call) exp).el, type);
             } else if (exp instanceof IdentifierExp) {
                 return isDerived(type, lookupTypeForID(((IdentifierExp) exp).s));
+            } else if (exp instanceof NewObject) {
+                return isDerived(type, ((NewObject)exp).i.s);
             }
             return false;
         }
@@ -641,20 +664,6 @@ public class ErrorCheckVisitor implements Visitor {
             IdentifierExp ie = ((IdentifierExp) arr.e1);
             return isVariableDefined(currentClass, currentMethod, ie, "intArray")
                     && isArithmeticExpression(arr.e2);
-        }
-        return false;
-    }
-
-    private boolean arrayLookupCallHelper(Exp exp) {
-        // a    [0]
-        // - call, id    - call, id, integer
-        if (exp instanceof Call) {
-            Call c = (Call) exp;
-            return isCall(c.e, c.i, c.el, "integer");
-        } else if (exp instanceof IntegerLiteral) {
-            return true;
-        } else if (exp instanceof IdentifierExp) {
-            return isVariableDefined(currentClass, currentMethod, exp, "integer");
         }
         return false;
     }
