@@ -218,55 +218,6 @@ public class ErrorCheckVisitor implements Visitor {
         return false;
     }
 
-    // assuming that it does exist in the symboltable
-    private String getMethodType(String className, Identifier id, ExpList expList) {
-        String methodName = id.s;
-        MethodScope ms = symbolTable.getClassScope(className).getMethodScope(methodName);
-        for (int i = 0; i < ms.arguments.size(); i++) {
-            ArgumentType at = ms.arguments.get(i);
-            Exp exp = expList.get(i);
-            if (at.type.equals("integer")) {
-                if (!isArithmeticExpression(exp)) {
-                    // TODO: some kind of printed error about args not matching required types
-                    return null;
-                }
-            } else if (at.type.equals("boolean")) {
-                if (!isBooleanExpression(exp)) {
-                    // TODO: some kind of printed error
-                    return null;
-                }
-            } else if (at.type.equals("intArray")) {
-                if (exp instanceof Call) {
-                    if(!isCall(((Call) exp).e, ((Call) exp).i, ((Call) exp).el, "intArray")) {
-                        return null;
-                    }
-                } else if(exp instanceof IdentifierExp) {
-                    if(!isVariableDefined(className, methodName, (IdentifierExp) exp, "intArray")) {
-                        return null;
-                    }
-                } else {
-                    // TODO: some kind of printed error
-                    return null;
-                }
-            } else if (at.type.equals(typeTable.getType(at.type))) {
-                // identifier case
-                if (exp instanceof Call) {
-                    if (!isCall(((Call) exp).e, ((Call) exp).i, ((Call) exp).el, at.type)) {
-                        return null;
-                    }
-                } else if(exp instanceof IdentifierExp) {
-                    if (!isVariableDefined(className, methodName, (IdentifierExp) exp, at.type)) {
-                        return null;
-                    }
-                } else {
-                    // TODO: some kind of printed error
-                    return null;
-                }
-            }
-        }
-        return ms.methodType;
-    }
-
     private String isCallHelper(Exp exp, Identifier id, ExpList expList) {
         if (exp instanceof Call) {
             // recursive shit
@@ -274,36 +225,26 @@ public class ErrorCheckVisitor implements Visitor {
             if (classname == null || !isExtendedFrom(classname, id.s)) {
                 return null;
             }
-            /*
-            if (!symbolTable.getClassScope(classname).methodMap.containsKey(id.s)) {
-                //TODO: error
-                return null;
-            }
-             */
             return getMethodType(classname, id, expList);
         } else if (exp instanceof IdentifierExp) {
-            if (!typeTable.types.containsKey(((IdentifierExp)exp).s)) {
-                //TODO: error classname does not exist in scope
+            String variableClass = lookupTypeForID(((IdentifierExp) exp).s);
+            if (variableClass == null) {
+                System.out.println("Error (line " + exp.line_number + ") Variable: " + ((IdentifierExp) exp).s + " does not exist in scope");
                 return null;
             }
-            if (!isExtendedFrom(((IdentifierExp) exp).s, id.s)) {
+            if (!isExtendedFrom(variableClass, id.s)) {
+                System.out.println("Error (line " + exp.line_number + ") Method: " + id.s + " not in scope of " + variableClass);
                 return null;
             }
-            /*
-            if (!symbolTable.getClassScope(((IdentifierExp)exp).s).methodMap.containsKey(id.s)) {
-                //TODO: error
-                return null;
-            }
-             */
-            return getMethodType(((IdentifierExp)exp).s, id, expList);
-
+            return getMethodType(variableClass, id, expList);
         } else if (exp instanceof This) {
             if (!isExtendedFrom(currentClass, id.s)) {
                 return null;
             }
             return getMethodType(currentClass, id, expList);
         } else if (exp instanceof NewObject) {
-            if(typeTable.types.containsKey(((NewObject) exp).i)) {
+            if(!typeTable.types.containsKey(((NewObject) exp).i.s)) {
+                System.out.println("Error (line " + exp.line_number + ") Class: " + ((NewObject) exp).i.s + " does not exist in scope");
                 return null;
             }
             return getMethodType(((NewObject) exp).i.s, id, expList);
@@ -336,23 +277,18 @@ public class ErrorCheckVisitor implements Visitor {
             if (!isExtendedFrom(classname, id.s)) {
                 return false;
             }
-            /*
-            if (!symbolTable.getClassScope(classname).methodMap.containsKey(id.s)) {
-                //TODO: PRINT ERROR
-                return false;
-            }
-             */
             return isMethodDefined(classname, id, expList, type);
         } else if (exp instanceof IdentifierExp) {
-            if (!typeTable.types.containsKey(((IdentifierExp)exp).s)) {
-                //TODO: error classname does not exist in scope
+            String variableClass = lookupTypeForID(((IdentifierExp) exp).s);
+            if (variableClass == null) {
+                System.out.println("Error (line " + exp.line_number + ") Variable: " + ((IdentifierExp) exp).s + " does not exist in scope");
                 return false;
             }
-            if (!isExtendedFrom(((IdentifierExp) exp).s, id.s)) {
-                //TODO: PRINT ERROR
+            if (!isExtendedFrom(variableClass, id.s)) {
+                System.out.println("Error (line " + exp.line_number + ") Method: " + id.s + " not in scope of " + variableClass);
                 return false;
             }
-            return isMethodDefined(((IdentifierExp)exp).s, id, expList, type);
+            return isMethodDefined(variableClass, id, expList, type);
 
         } else if (exp instanceof This) {
             if (!isExtendedFrom(currentClass, id.s)) {
@@ -360,7 +296,8 @@ public class ErrorCheckVisitor implements Visitor {
             }
             return isMethodDefined(currentClass, id, expList, type);
         } else if (exp instanceof NewObject) {
-            if(typeTable.types.containsKey(((NewObject) exp).i)) {
+            if(!typeTable.types.containsKey(((NewObject) exp).i.s)) {
+                System.out.println("Error (line " + exp.line_number + ") Class: " + ((NewObject) exp).i.s + " does not exist");
                 return false;
             }
             return isMethodDefined(((NewObject) exp).i.s, id, expList, type);
@@ -403,19 +340,27 @@ public class ErrorCheckVisitor implements Visitor {
                     }
                 } else if (at.type.equals("intArray")) {
                     if (exp instanceof Call) {
-                        return isCall(((Call) exp).e, ((Call) exp).i, ((Call) exp).el, "intArray");
+                        if(!isCall(((Call) exp).e, ((Call) exp).i, ((Call) exp).el, "intArray")) {
+                            return false;
+                        }
                     } else if(exp instanceof IdentifierExp) {
-                        return isVariableDefined(className, methodName, (IdentifierExp) exp, "intArray");
+                        if (!isVariableDefined(className, methodName, exp, "intArray")) {
+                            return false;
+                        }
                     } else {
                         // TODO: some kind of printed error
                         return false;
                     }
-                } else if (at.type.equals(typeTable.getType(at.type))) {
+                } else if (typeTable.types.containsKey(at.type)) {
                     // identifier case
                     if (exp instanceof Call) {
                         return isCall(((Call) exp).e, ((Call) exp).i, ((Call) exp).el, at.type);
                     } else if(exp instanceof IdentifierExp) {
-                        return isVariableDefined(className, methodName, (IdentifierExp) exp, at.type);
+                        String variableType = lookupTypeForID(((IdentifierExp) exp).s);
+                        if (!(variableType != null && variableType.equals(at.type))) {
+                            return false;
+                        }
+                        //return isVariableDefined(className, methodName, exp, at.type);
                     } else {
                         // TODO: some kind of printed error
                         return false;
@@ -427,6 +372,56 @@ public class ErrorCheckVisitor implements Visitor {
             return false;
         }
         return true;
+    }
+
+    // assuming that it does exist in the symboltable
+    private String getMethodType(String className, Identifier id, ExpList expList) {
+        String methodName = id.s;
+        MethodScope ms = symbolTable.getClassScope(className).getMethodScope(methodName);
+        for (int i = 0; i < ms.arguments.size(); i++) {
+            ArgumentType at = ms.arguments.get(i);
+            Exp exp = expList.get(i);
+            if (at.type.equals("integer")) {
+                if (!isArithmeticExpression(exp)) {
+                    // TODO: some kind of printed error about args not matching required types
+                    return null;
+                }
+            } else if (at.type.equals("boolean")) {
+                if (!isBooleanExpression(exp)) {
+                    // TODO: some kind of printed error
+                    return null;
+                }
+            } else if (at.type.equals("intArray")) {
+                if (exp instanceof Call) {
+                    if(!isCall(((Call) exp).e, ((Call) exp).i, ((Call) exp).el, "intArray")) {
+                        return null;
+                    }
+                } else if(exp instanceof IdentifierExp) {
+                    if(!isVariableDefined(className, methodName, (IdentifierExp) exp, "intArray")) {
+                        return null;
+                    }
+                } else {
+                    // TODO: some kind of printed error
+                    return null;
+                }
+            } else if (typeTable.types.containsKey(at.type)) {
+                // identifier case
+                if (exp instanceof Call) {
+                    if (!isCall(((Call) exp).e, ((Call) exp).i, ((Call) exp).el, at.type)) {
+                        return null;
+                    }
+                } else if(exp instanceof IdentifierExp) {
+                    String variableType = lookupTypeForID(((IdentifierExp) exp).s);
+                    if (!(variableType != null && variableType.equals(at.type))) {
+                        return null;
+                    }
+                } else {
+                    // TODO: some kind of printed error
+                    return null;
+                }
+            }
+        }
+        return ms.methodType;
     }
 
     private boolean isVariableDefined(String className, String methodName, Exp e, String type) {
@@ -446,6 +441,7 @@ public class ErrorCheckVisitor implements Visitor {
         if (cs.variableMap.containsKey(id) && isDerived(type, cs.variableMap.get(id))) {
             return true;
         }
+        System.out.println("Class: "+className+" Method: "+methodName+" id: "+id+" compare with type: "+type);
         return false;
     }
 
@@ -511,13 +507,13 @@ public class ErrorCheckVisitor implements Visitor {
                 return isArithmeticExpression(((NewArray) exp).e);
             }
             return false;
-        } else if (type.equals(typeTable.getType(type))) {
+        } else if (typeTable.types.containsKey(type)) {
             if (exp instanceof Call) {
                 return isCall(((Call) exp).e, ((Call) exp).i, ((Call) exp).el, type);
             } else if (exp instanceof IdentifierExp) {
                 return isDerived(type, lookupTypeForID(((IdentifierExp) exp).s));
             } else if (exp instanceof NewObject) {
-                return isDerived(type, ((NewObject)exp).i.s);
+                return isDerived(type, ((NewObject) exp).i.s);
             }
             return false;
         }
