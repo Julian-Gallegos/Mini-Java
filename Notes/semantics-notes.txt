@@ -1,0 +1,3 @@
+we did not make any changes in the previous parts of the project (scanner, parser, ASTs) as we implemented
+the semantics checks.
+additionally, we did not go beyond following the checklist described in the overview section of the spec.
