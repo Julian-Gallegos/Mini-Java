@@ -1,0 +1,25 @@
+CSE 401/M501 Project III - Semantics
+
+False negative: variables in a method cannot be declared more than once. (-2)
+
+False negative: methods must be called only with the same number of arguments specified in their definition. (-2)
+
+The semantics checker crashed with an exception when trying to check a file that had a class extending from an undeclared superclass. (-2)
+
+False negative: “System.out.println” can only take integer arguments. (-2)
+
+False negative: return type in function header must match actual returned type. (-2)
+
+The semantics checker crashed with an exception when an undeclared variable was assigned to. (-2)
+
+False negative: a method cannot take an undeclared type as an argument. For example, if class Bar is not defined, then ‘public int foo(Bar b)’ should fail type checking. (-2)
+
+False negative: a method cannot return an undeclared type. For example, if class Bar is not yet defined, then methods should not be able to have a return type of Bar. (-2)
+
+False positive: a subclass automatically inherits all the methods from its superclass. (-2)
+
+The compiler does not always return 1 for files that fail semantics checking. (-2)
+
+The compiler crashed with an array out of bounds exception when checking files with duplicate method declarations. (-2)
+
+Total: 58/80
