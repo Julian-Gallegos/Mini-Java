@@ -1,3 +1,4 @@
+import Codegen.CodegenVisitor;
 import Scanner.*;
 import Parser.*;
 import AST.*;
@@ -22,6 +23,17 @@ public class MiniJava {
             parser p = new parser(s, sf);
             Symbol root = p.parse();
 
+            if (args.length == 1) {
+                // code generation
+                Program program = (Program) root.value;
+                GeneratorVisitor gv = new GeneratorVisitor(program);
+                ErrorCheckVisitor ecv = new ErrorCheckVisitor(program, gv.symbolTable, gv.typeTable);
+                if (!ecv.errorsInProgram()) {
+                    CodegenVisitor cv = new CodegenVisitor(program);
+                } else {
+                    // errors found in program
+                }
+            }
             if (args.length > 2) {
                 System.exit(1); 
             }

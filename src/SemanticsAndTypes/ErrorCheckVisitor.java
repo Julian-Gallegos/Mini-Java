@@ -12,11 +12,18 @@ public class ErrorCheckVisitor implements Visitor {
     private String currentClass;
     private String currentMethod;
 
+    private int errorCounter;
+
     public ErrorCheckVisitor(Program root, SymbolTable st, TypeTable tt) {
         // TODO
+        errorCounter = 0;
         symbolTable = st;
         typeTable = tt;
         root.accept(this);
+    }
+
+    public boolean errorsInProgram() {
+        return (errorCounter > 0);
     }
 
     // Display added for toy example language.  Not used in regular MiniJava
@@ -84,10 +91,12 @@ public class ErrorCheckVisitor implements Visitor {
                                 || (t instanceof IntegerType && superType.equals("integer"))
                                 || (t instanceof IntArrayType && superType.equals("intArray"))
                                 || (t instanceof IdentifierType && superType.equals(((IdentifierType)t).s)))) {
+                            errorCounter++;
                             System.out.println("Error (line " + n.ml.get(i).line_number + ") override method argument types do not match");
                         }
                     }
                 } else {
+                    errorCounter++;
                     System.out.println("Error (line " + n.ml.get(i).line_number + ") override method return type does not match");
                 }
             }
@@ -217,6 +226,7 @@ public class ErrorCheckVisitor implements Visitor {
         if (exp instanceof Call) {
             String classname = isCallHelper(((Call)exp).e,((Call)exp).i,((Call)exp).el);
             if (classname == null || !isExtendedFrom(classname, id.s)) {
+                errorCounter++;
                 System.out.println("Error (line " + exp.line_number + ") Method: " + id.s + " does not exist in scope");
                 return null;
             }
@@ -224,22 +234,26 @@ public class ErrorCheckVisitor implements Visitor {
         } else if (exp instanceof IdentifierExp) {
             String variableClass = lookupTypeForID(((IdentifierExp) exp).s);
             if (variableClass == null) {
+                errorCounter++;
                 System.out.println("Error (line " + exp.line_number + ") Variable: " + ((IdentifierExp) exp).s + " does not exist in scope");
                 return null;
             }
             if (!isExtendedFrom(variableClass, id.s)) {
+                errorCounter++;
                 System.out.println("Error (line " + exp.line_number + ") Method: " + id.s + " not in scope of " + variableClass);
                 return null;
             }
             return getMethodType(variableClass, id, expList);
         } else if (exp instanceof This) {
             if (!isExtendedFrom(currentClass, id.s)) {
+                errorCounter++;
                 System.out.println("Error (line " + exp.line_number + ") Method: " + id.s + " not in scope of current class");
                 return null;
             }
             return getMethodType(currentClass, id, expList);
         } else if (exp instanceof NewObject) {
             if(!typeTable.types.containsKey(((NewObject) exp).i.s)) {
+                errorCounter++;
                 System.out.println("Error (line " + exp.line_number + ") Class: " + ((NewObject) exp).i.s + " does not exist in scope");
                 return null;
             }
@@ -247,6 +261,7 @@ public class ErrorCheckVisitor implements Visitor {
         } else if (exp instanceof NewArray) {
             // MiniJava array only has the .length field.
             if (!isArithmeticExpression(((NewArray) exp).e) || !id.s.equals("length")) {
+                errorCounter++;
                 System.out.println("Error (line " + exp.line_number + ") Invalid Array.length call");
                 return null;
             }
@@ -277,10 +292,12 @@ public class ErrorCheckVisitor implements Visitor {
         } else if (exp instanceof IdentifierExp) {
             String variableClass = lookupTypeForID(((IdentifierExp) exp).s);
             if (variableClass == null) {
+                errorCounter++;
                 System.out.println("Error (line " + exp.line_number + ") Variable: " + ((IdentifierExp) exp).s + " does not exist in scope");
                 return false;
             }
             if (!isExtendedFrom(variableClass, id.s)) {
+                errorCounter++;
                 System.out.println("Error (line " + exp.line_number + ") Method: " + id.s + " not in scope of " + variableClass);
                 return false;
             }
@@ -288,12 +305,14 @@ public class ErrorCheckVisitor implements Visitor {
 
         } else if (exp instanceof This) {
             if (!isExtendedFrom(currentClass, id.s)) {
+                errorCounter++;
                 System.out.println("Error (line " + exp.line_number + ") Method: " + id.s + " not in scope of current class");
                 return false;
             }
             return isMethodDefined(currentClass, id, expList, type);
         } else if (exp instanceof NewObject) {
             if(!typeTable.types.containsKey(((NewObject) exp).i.s)) {
+                errorCounter++;
                 System.out.println("Error (line " + exp.line_number + ") Class: " + ((NewObject) exp).i.s + " does not exist");
                 return false;
             }
@@ -312,10 +331,12 @@ public class ErrorCheckVisitor implements Visitor {
             MethodScope ms = cs.getMethodScope(methodName);
 
             if (!isDerived(type, ms.methodType)) {
+                errorCounter++;
                 System.out.println("Error (line " + id.line_number + ") method return type invalid");
                 return false;
             }
             if (ms.arguments.size() != expList.size()) {
+                errorCounter++;
                 System.out.println("Error (line " + id.line_number + ") method argument count mismatch");
                 return false;
             }
@@ -325,26 +346,31 @@ public class ErrorCheckVisitor implements Visitor {
                 // string, integer, boolean
                 if (at.type.equals("integer")) {
                     if (!isArithmeticExpression(exp)) {
+                        errorCounter++;
                         System.out.println("Error (line " + exp.line_number + ") method argument number " +i+ " has type mismatch");
                         return false;
                     }
                 } else if (at.type.equals("boolean")) {
                     if (!isBooleanExpression(exp)) {
+                        errorCounter++;
                         System.out.println("Error (line " + exp.line_number + ") method argument number " +i+ " has type mismatch");
                         return false;
                     }
                 } else if (at.type.equals("intArray")) {
                     if (exp instanceof Call) {
                         if(!isCall(((Call) exp).e, ((Call) exp).i, ((Call) exp).el, "intArray")) {
+                            errorCounter++;
                             System.out.println("Error (line " + exp.line_number + ") method argument number " +i+ " has type mismatch");
                             return false;
                         }
                     } else if(exp instanceof IdentifierExp) {
                         if (!isVariableDefined(className, methodName, exp, "intArray")) {
+                            errorCounter++;
                             System.out.println("Error (line " + exp.line_number + ") method argument number " +i+ " has type mismatch");
                             return false;
                         }
                     } else {
+                        errorCounter++;
                         System.out.println("Error (line " + exp.line_number + ") method argument number " +i+ " has type mismatch");
                         return false;
                     }
@@ -355,21 +381,25 @@ public class ErrorCheckVisitor implements Visitor {
                     } else if(exp instanceof IdentifierExp) {
                         String variableType = lookupTypeForID(((IdentifierExp) exp).s);
                         if (!(variableType != null && isDerived(at.type, variableType))) {
+                            errorCounter++;
                             System.out.println("Error (line " + exp.line_number + ") method argument number " +i+ " has type mismatch");
                             return false;
                         }
                     } else if (exp instanceof This) {
                         if(!isDerived(at.type, currentClass)) {
+                            errorCounter++;
                             System.out.println("Error (line " + exp.line_number + ") method argument number " +i+ " has type mismatch");
                             return false;
                         }
                     } else {
+                        errorCounter++;
                         System.out.println("Error (line " + exp.line_number + ") method argument number " +i+ " has type mismatch");
                         return false;
                     }
                 }
             }
         } else {
+            errorCounter++;
             System.out.println("Error (line " + id.line_number + ") Method: "+id.s+" not defined in scope");
             return false;
         }
@@ -385,26 +415,31 @@ public class ErrorCheckVisitor implements Visitor {
             Exp exp = expList.get(i);
             if (at.type.equals("integer")) {
                 if (!isArithmeticExpression(exp)) {
+                    errorCounter++;
                     System.out.println("Error (line " + exp.line_number + ") method argument number " +i+ " has type mismatch");
                     return null;
                 }
             } else if (at.type.equals("boolean")) {
                 if (!isBooleanExpression(exp)) {
+                    errorCounter++;
                     System.out.println("Error (line " + exp.line_number + ") method argument number " +i+ " has type mismatch");
                     return null;
                 }
             } else if (at.type.equals("intArray")) {
                 if (exp instanceof Call) {
                     if(!isCall(((Call) exp).e, ((Call) exp).i, ((Call) exp).el, "intArray")) {
+                        errorCounter++;
                         System.out.println("Error (line " + exp.line_number + ") method argument number " +i+ " has type mismatch");
                         return null;
                     }
                 } else if(exp instanceof IdentifierExp) {
                     if(!isVariableDefined(className, methodName, exp, "intArray")) {
+                        errorCounter++;
                         System.out.println("Error (line " + exp.line_number + ") method argument number " +i+ " has type mismatch");
                         return null;
                     }
                 } else {
+                    errorCounter++;
                     System.out.println("Error (line " + exp.line_number + ") method argument number " +i+ " has type mismatch");
                     return null;
                 }
@@ -412,21 +447,25 @@ public class ErrorCheckVisitor implements Visitor {
                 // identifier case
                 if (exp instanceof Call) {
                     if (!isCall(((Call) exp).e, ((Call) exp).i, ((Call) exp).el, at.type)) {
+                        errorCounter++;
                         System.out.println("Error (line " + exp.line_number + ") method argument number " +i+ " has type mismatch");
                         return null;
                     }
                 } else if(exp instanceof IdentifierExp) {
                     String variableType = lookupTypeForID(((IdentifierExp) exp).s);
                     if (!(variableType != null && isDerived(at.type, variableType))) {
+                        errorCounter++;
                         System.out.println("Error (line " + exp.line_number + ") method argument number " +i+ " has type mismatch");
                         return null;
                     }
                 } else if (exp instanceof This) {
                     if(!isDerived(at.type, currentClass)) {
+                        errorCounter++;
                         System.out.println("Error (line " + exp.line_number + ") method argument number " +i+ " has type mismatch");
                         return null;
                     }
                 } else {
+                    errorCounter++;
                     System.out.println("Error (line " + exp.line_number + ") method argument number " +i+ " has type mismatch");
                     return null;
                 }
@@ -460,6 +499,7 @@ public class ErrorCheckVisitor implements Visitor {
     // Statement s1,s2;
     public void visit(If n) {
         if (!isBooleanExpression(n.e)) {
+            errorCounter++;
             System.out.println("Error (line " + n.e.line_number + ") condition is not of type boolean");
         }
         n.e.accept(this);
@@ -471,6 +511,7 @@ public class ErrorCheckVisitor implements Visitor {
     // Statement s;
     public void visit(While n) {
         if (!isBooleanExpression(n.e)) {
+            errorCounter++;
             System.out.println("Error (line " + n.e.line_number + ") conditional not boolean");
         }
         n.e.accept(this);
@@ -487,6 +528,7 @@ public class ErrorCheckVisitor implements Visitor {
     public void visit(Assign n) {
         n.i.accept(this);
         if (!areEqualTypes(n.e, lookupTypeForID(n.i.s))) {
+            errorCounter++;
             System.out.println("Error (line " + n.i.line_number + ") types do not match");
         }
         n.e.accept(this);
@@ -611,6 +653,7 @@ public class ErrorCheckVisitor implements Visitor {
         n.i.accept(this);
         if (!(lookupTypeForID(n.i.s).equals("intArray")
                 && isArithmeticExpression(n.e1) && isArithmeticExpression(n.e2))) {
+            errorCounter++;
             System.out.println("Error: (line " + n.i.line_number + ") array assign failed");
         }
         n.e1.accept(this);
@@ -621,6 +664,7 @@ public class ErrorCheckVisitor implements Visitor {
     public void visit(And n) {
         n.e1.accept(this);
         if (!(isBooleanExpression(n.e1) && isBooleanExpression(n.e2))) {
+            errorCounter++;
             System.out.println("Error: (line " + n.e1.line_number + ") types do not match");
         }
         n.e2.accept(this);
@@ -630,6 +674,7 @@ public class ErrorCheckVisitor implements Visitor {
     public void visit(LessThan n) {
         n.e1.accept(this);
         if (!(isArithmeticExpression(n.e1) && isArithmeticExpression(n.e2))) {
+            errorCounter++;
             System.out.println("Error: (line " + n.e1.line_number + ") types do not match");
         }
         n.e2.accept(this);
@@ -639,6 +684,7 @@ public class ErrorCheckVisitor implements Visitor {
     public void visit(Plus n) {
         n.e1.accept(this);
         if (!(isArithmeticExpression(n.e1) && isArithmeticExpression(n.e2))) {
+            errorCounter++;
             System.out.println("Error: (line " + n.e1.line_number + ") types do not match");
         }
         n.e2.accept(this);
@@ -648,6 +694,7 @@ public class ErrorCheckVisitor implements Visitor {
     public void visit(Minus n) {
         n.e1.accept(this);
         if (!(isArithmeticExpression(n.e1) && isArithmeticExpression(n.e2))) {
+            errorCounter++;
             System.out.println("Error: (line " + n.e1.line_number + ") types do not match");
         }
         n.e2.accept(this);
@@ -657,6 +704,7 @@ public class ErrorCheckVisitor implements Visitor {
     public void visit(Times n) {
         n.e1.accept(this);
         if (!(isArithmeticExpression(n.e1) && isArithmeticExpression(n.e2))) {
+            errorCounter++;
             System.out.println("Error: (line " + n.e1.line_number + ") types do not match");
         }
         n.e2.accept(this);
@@ -665,10 +713,12 @@ public class ErrorCheckVisitor implements Visitor {
     // Exp e1,e2;
     public void visit(ArrayLookup n) {
         if (!isArray(n)) {
+            errorCounter++;
             System.out.println("Error: (line " + n.e1.line_number + ") array described is not valid");
         }
         n.e1.accept(this);
         if (!isArithmeticExpression(n.e2)) {
+            errorCounter++;
             System.out.println("Error: (line " + n.e2.line_number + ") expression in bracket is not of integer type");
         }
         n.e2.accept(this);
@@ -677,6 +727,7 @@ public class ErrorCheckVisitor implements Visitor {
     // Exp e;
     public void visit(ArrayLength n) {
         if (!isArrayLength(n.e)) {
+            errorCounter++;
             System.out.println("Error: (line " + n.e.line_number + ") array described is not valid");
         }
         n.e.accept(this);
@@ -709,6 +760,7 @@ public class ErrorCheckVisitor implements Visitor {
     // ExpList el;
     public void visit(Call n) {
         if (isCallHelper(n.e, n.i, n.el) == null) {
+            errorCounter++;
             System.out.println("Error: (line " + n.e.line_number + ") invalid call");
         }
         n.e.accept(this);
@@ -738,6 +790,7 @@ public class ErrorCheckVisitor implements Visitor {
     // Exp e;
     public void visit(NewArray n) {
         if (!isArithmeticExpression(n.e)) {
+            errorCounter++;
           System.out.println("Error (line " + n.e.line_number + ") expression not of type integer");
         }
         n.e.accept(this);
@@ -746,6 +799,7 @@ public class ErrorCheckVisitor implements Visitor {
     // Identifier i;
     public void visit(NewObject n) {
         if (symbolTable.getClassScope(n.i.s) == null) {
+            errorCounter++;
             System.out.println("Error (line " + n.i.line_number + ") class not found");
         }
     }
@@ -753,6 +807,7 @@ public class ErrorCheckVisitor implements Visitor {
     // Exp e;
     public void visit(Not n) {
         if (!(isBooleanExpression(n.e))) {
+            errorCounter++;
             System.out.println("Error: (line " + n.e.line_number + ") not boolean expression");
         }
         n.e.accept(this);
