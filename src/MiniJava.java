@@ -23,8 +23,6 @@ public class MiniJava {
             parser p = new parser(s, sf);
             Symbol root = p.parse();
 
-	    System.out.println("Test: " + Arrays.toString(args));
-	    System.out.println("Test: " + args.length); 
             if (args.length == 1) {
                 // code generatio 
                 Program program = (Program) root.value;
