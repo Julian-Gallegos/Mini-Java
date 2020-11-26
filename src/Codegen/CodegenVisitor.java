@@ -157,7 +157,7 @@ public class CodegenVisitor implements Visitor {
         movq    $5,%rdi     # System.out.println(5)
         call    _put
          */
-        codeGen.gen("movq %rax %rdi");
+        codeGen.gen("movq %rax, %rdi");
         codeGen.put();
     }
 
@@ -257,7 +257,7 @@ public class CodegenVisitor implements Visitor {
 
     // int i;
     public void visit(IntegerLiteral n) {
-        codeGen.gen("movq $" + n.i + " %rax");
+        codeGen.gen("movq $" + n.i + ", %rax");
     }
 
     public void visit(True n) {
