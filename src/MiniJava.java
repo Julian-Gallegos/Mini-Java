@@ -29,14 +29,14 @@ public class MiniJava {
                 // code generatio 
                 Program program = (Program) root.value;
                 GeneratorVisitor gv = new GeneratorVisitor(program);
-                ErrorCheckVisitor ecv = new ErrorCheckVisitor(program, gv.symbolTable, gv.typeTable);
-                if (!ecv.errorsInProgram()) {
-                    CodegenVisitor cv = new CodegenVisitor(program);
-                    System.exit(0);
-                } else {
-                    // errors found in program
-                    System.exit(1);
-                }
+		// ErrorCheckVisitor ecv = new ErrorCheckVisitor(program, gv.symbolTable, gv.typeTable);
+                //if (!ecv.errorsInProgram()) {
+		CodegenVisitor cv = new CodegenVisitor(program);
+		System.exit(0);
+                //} else {
+		// errors found in program
+		//System.exit(1);
+                //}
             }
             if (args.length > 2) {
                 System.exit(1); 
