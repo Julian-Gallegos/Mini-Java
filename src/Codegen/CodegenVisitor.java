@@ -285,9 +285,15 @@ public class CodegenVisitor implements Visitor {
 
     // Identifier i;
     public void visit(NewObject n) {
-        //System.out.print("new ");
-        //System.out.print(n.i.s);
-        //System.out.print("()");
+        codeGen.callocNewObject(8);
+        codeGen.gen("leaq " + n.i.s + "$$(%rip), %rdx");  // get method table address
+        codeGen.gen("movq %rdx, 0(%rax)");                // store vtbl ptr at beginning of object
+        codeGen.gen("%rax, %rdi");                        // set up "this" for constructor
+        codeGen.gen("%rax, [offsetTemp](%rbp)");          // save "this" for later (or maybe pushq)
+        // load constructor arguments
+        codeGen.gen(n.i.s + "$" + n.i.s);                 // call ctor if we have one (no vtbl lookup)
+        codeGen.gen("[offsetTemp](%rbp), %rax");          // recover ptr to object
+        //codeGen.gen("%rax, [offsetOne](%rbp)");          // store object reference in variable one
     }
 
     // Exp e;

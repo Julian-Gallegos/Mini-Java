@@ -1,9 +1,6 @@
 package Codegen;
 
 public class CodeGenerator {
-    // TODO
-    // declare any fields
-
     int stackCounter;
 
     public CodeGenerator() {
@@ -24,6 +21,10 @@ public class CodeGenerator {
         System.out.println("\tcall put");
     }
 
+    public void calloc() {
+        System.out.println("\tcall mjcalloc");
+    }
+
     // write code string s to .asm output
     public void gen(String s) {
         System.out.println("\t" + s);
@@ -34,7 +35,17 @@ public class CodeGenerator {
         System.out.println(l + ":");
     }
 
-
+    /**
+     * handles the logic of creating a new object
+     *
+     * @param bytes     the size of the object to create in bytes
+     */
+    public void callocNewObject(int bytes) {
+        // TODO
+        gen("movq $" + bytes + ", %rdi");
+        calloc();
+        //gen("leaq One$$(%rip),%rdx");
+    }
 
 
 

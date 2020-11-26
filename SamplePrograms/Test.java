@@ -1,10 +1,19 @@
 class Test{
     public static void main(String[] a) {
         {
-            //System.out.println(17);
-            //System.out.println(2 + 1 * 2 - 1);
-            System.out.println(3 + (2 * 5));
+            Person p = new Person();
+            p.testA();
+            p.testB();
         }
+    }
+}
 
+class Person {
+    public void testA() {
+        System.out.println("401");
+    }
+
+    public void testB() {
+        System.out.println(2020);
     }
 }
