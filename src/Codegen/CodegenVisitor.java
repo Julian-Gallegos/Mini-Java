@@ -2,11 +2,14 @@ package Codegen;
 
 import AST.*;
 import AST.Visitor.Visitor;
+import SemanticsAndTypes.SymbolTable;
 
 public class CodegenVisitor implements Visitor {
     private CodeGenerator codeGen;
+    private SymbolTable symbolTable;
 
-    public CodegenVisitor(Program root) {
+    public CodegenVisitor(Program root, SymbolTable symbolTable) {
+        this.symbolTable = symbolTable;
         codeGen = new CodeGenerator();
         root.accept(this);
     }
@@ -52,10 +55,11 @@ public class CodegenVisitor implements Visitor {
         n.i.accept(this);
         //System.out.println(" { ");
         for ( int i = 0; i < n.vl.size(); i++ ) {
-            //System.out.print("  ");
             n.vl.get(i).accept(this);
         }
+        codeGen.vtableHeader(n.i.s, "0");
         for ( int i = 0; i < n.ml.size(); i++ ) {
+            codeGen.gen(".quad " + n.i.s + "$" + n.ml.get(i).i.s);
             n.ml.get(i).accept(this);
         }
     }
@@ -248,11 +252,17 @@ public class CodegenVisitor implements Visitor {
         n.e.accept(this);
         //System.out.print(".");
         n.i.accept(this);
-        //System.out.print("(");
+
+        int objOffset = symbolTable.getClassOffset(((IdentifierExp) n.e).s);
+        int methodOffset = symbolTable.getClassScope(((IdentifierExp) n.e).s).getMethodOffset(n.i.s);
+
+        codeGen.gen("movq " + objOffset + "(%rbp), %rdi");    // first argument is obj prt ("this")
+        codeGen.gen("0(%rdi), %rax");                         // load vtable address into %rax
+        codeGen.gen("call *" + methodOffset + "(%rax)");      // call function whose address is at
+                                                                 // the specified offset in the vtable
         for ( int i = 0; i < n.el.size(); i++ ) {
             n.el.get(i).accept(this);
         }
-        //System.out.print(")");
     }
 
     // int i;
@@ -288,12 +298,12 @@ public class CodegenVisitor implements Visitor {
         codeGen.callocNewObject(8);
         codeGen.gen("leaq " + n.i.s + "$$(%rip), %rdx");  // get method table address
         codeGen.gen("movq %rdx, 0(%rax)");                // store vtbl ptr at beginning of object
-        codeGen.gen("%rax, %rdi");                        // set up "this" for constructor
-        codeGen.gen("%rax, [offsetTemp](%rbp)");          // save "this" for later (or maybe pushq)
+        //codeGen.gen("%rax, %rdi");                        // set up "this" for constructor
+        //codeGen.gen("%rax, [offsetTemp](%rbp)");          // save "this" for later (or maybe pushq)
         // load constructor arguments
-        codeGen.gen(n.i.s + "$" + n.i.s);                 // call ctor if we have one (no vtbl lookup)
-        codeGen.gen("[offsetTemp](%rbp), %rax");          // recover ptr to object
-        //codeGen.gen("%rax, [offsetOne](%rbp)");          // store object reference in variable one
+        //codeGen.gen(n.i.s + "$" + n.i.s);                 // call ctor if we have one (no vtbl lookup)
+        //codeGen.gen("[offsetTemp](%rbp), %rax");          // recover ptr to object
+        //codeGen.gen("%rax, [offsetOne](%rbp)");            // store object reference in variable one
     }
 
     // Exp e;

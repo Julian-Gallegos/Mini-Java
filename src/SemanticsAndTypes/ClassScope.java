@@ -1,15 +1,43 @@
 package SemanticsAndTypes;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ClassScope {
     public Map<String, MethodScope> methodMap;
     public Map<String, String> variableMap;
 
+    public List<String> orderedMethodList;
+
     public ClassScope() {
         methodMap = new HashMap<>();
         variableMap = new HashMap<>();
+        orderedMethodList = new ArrayList<>();
+    }
+
+    public int getMethodOffset(String methodName) {
+        // class Foo
+        // methods: X Y Z
+        int offset = 8;  // first 8 bytes of object consist of the vtable pointer
+        for (String m : orderedMethodList) {
+            if (m.equals(methodName)) {
+                return offset;
+            }
+            offset += 8;  // assuming each method is 8 bytes - indifferent of # of params
+        }
+        return -1;
+    }
+
+    // class size is assumed to be the sum of the field sizes.
+    public int getClassSize() {
+        // TODO
+        // deal with padding?
+        int vTablePointerSize = 8;
+        int defaultDataTypeSize = 8;
+
+        return vTablePointerSize + (defaultDataTypeSize * variableMap.size());
     }
 
     public boolean putMethod(String methodName, MethodScope methodScope) {

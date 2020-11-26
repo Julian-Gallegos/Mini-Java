@@ -41,6 +41,8 @@ public class GeneratorVisitor implements Visitor {
     // MethodDeclList ml;
     public void visit(ClassDeclSimple n) {
         symbolTable.putClass(n.i.s, new ClassScope());
+        symbolTable.orderedClassNames.add(n.i.s);
+
         typeTable.putType(n.i.s, null); // If class does not extend anything, set value as null.
         n.i.accept(this);  // class name
         for ( int i = 0; i < n.vl.size(); i++ ) {
@@ -50,6 +52,7 @@ public class GeneratorVisitor implements Visitor {
             n.vl.get(i).accept(this);
         }
         for ( int i = 0; i < n.ml.size(); i++ ) {
+            symbolTable.getClassScope(n.i.s).orderedMethodList.add(n.ml.get(i).i.s);
             String method = n.ml.get(i).i.s;
             String t = getType(n.ml.get(i).t);
             symbolTable.getClassScope(n.i.s).putMethod(method, new MethodScope(t));

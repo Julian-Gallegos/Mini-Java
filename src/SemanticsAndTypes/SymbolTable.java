@@ -1,17 +1,41 @@
 package SemanticsAndTypes;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class SymbolTable {
     // ...
     public Map<String, ClassScope> globalScope;
 
+    public List<String> orderedClassNames;
+
     public SymbolTable() {
         globalScope = new HashMap<>();
         //ClassScope length = new ClassScope();
         //length.putMethod("length", new MethodScope("integer"));
         //globalScope.put("intArray", length);
+        orderedClassNames = new ArrayList<>();
+    }
+
+    /**
+     * returns the offset of the classname,
+     * if class name is not defined, returns -1
+     *
+     * @param className the class to get offset of
+     * @return the offset in bytes
+     */
+    public int getClassOffset(String className) {
+        // Foo Bar Baz
+        int offset = 0;
+        for (String c : orderedClassNames) {
+            if (c.equals(className)) {
+                return offset;
+            }
+            offset += getClassScope(c).getClassSize();
+        }
+        return -1;
     }
 
     public boolean putClass(String className, ClassScope classScope) {

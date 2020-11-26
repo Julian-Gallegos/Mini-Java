@@ -2,9 +2,11 @@ package Codegen;
 
 public class CodeGenerator {
     int stackCounter;
+    int heapCounter;
 
     public CodeGenerator() {
         stackCounter = 0;
+        heapCounter = 0;  // may not need?
     }
 
     public void pushQ(String register) {
@@ -36,6 +38,20 @@ public class CodeGenerator {
     }
 
     /**
+     * header for method table for a class
+     *
+     * @param className     the class to create a method table for
+     * @param superClass    the class that 'className' extends.
+     *                      if 'className' extends no objects, it
+     *                      will be '0'.
+     */
+    public void vtableHeader(String className, String superClass) {
+        String str = className + "$$:\t.quad " + superClass;
+        str += superClass.equals("0") ? "" : "$$";
+        System.out.println(str);
+    }
+
+    /**
      * handles the logic of creating a new object
      *
      * @param bytes     the size of the object to create in bytes
@@ -44,7 +60,7 @@ public class CodeGenerator {
         // TODO
         gen("movq $" + bytes + ", %rdi");
         calloc();
-        //gen("leaq One$$(%rip),%rdx");
+        heapCounter++;
     }
 
 

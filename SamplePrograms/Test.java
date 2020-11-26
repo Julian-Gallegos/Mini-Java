@@ -1,9 +1,8 @@
 class Test{
     public static void main(String[] a) {
         {
-            Person p = new Person();
-            p.testA();
-            p.testB();
+            new Person().testA();
+            new Person().testB();
         }
     }
 }

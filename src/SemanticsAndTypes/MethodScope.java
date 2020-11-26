@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 public class MethodScope {
+
     public Map<String, String> methodVariables;
     public String methodType;
     // list tuple elements storing the name & type of argument.
