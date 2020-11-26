@@ -46,7 +46,7 @@ public class CodeGenerator {
      *                      will be '0'.
      */
     public void vtableHeader(String className, String superClass) {
-        String str = className + "$$:\t.quad " + superClass;
+        String str = className + "$$: .quad " + superClass;
         str += superClass.equals("0") ? "" : "$$";
         System.out.println(str);
     }

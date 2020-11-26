@@ -58,8 +58,10 @@ public class CodegenVisitor implements Visitor {
             n.vl.get(i).accept(this);
         }
         codeGen.vtableHeader(n.i.s, "0");
+	for ( int i = 0; i < n.ml.size(); i++ ) {
+	    codeGen.gen(".quad " + n.i.s + "$" + n.ml.get(i).i.s); 
+	}
         for ( int i = 0; i < n.ml.size(); i++ ) {
-            codeGen.gen(".quad " + n.i.s + "$" + n.ml.get(i).i.s);
             n.ml.get(i).accept(this);
         }
     }
@@ -253,11 +255,11 @@ public class CodegenVisitor implements Visitor {
         //System.out.print(".");
         n.i.accept(this);
 
-        int objOffset = symbolTable.getClassOffset(((IdentifierExp) n.e).s);
-        int methodOffset = symbolTable.getClassScope(((IdentifierExp) n.e).s).getMethodOffset(n.i.s);
+        int objOffset = symbolTable.getClassOffset(((NewObject) n.e).i.s);
+        int methodOffset = symbolTable.getClassScope(((NewObject) n.e).i.s).getMethodOffset(n.i.s);
 
         codeGen.gen("movq " + objOffset + "(%rbp), %rdi");    // first argument is obj prt ("this")
-        codeGen.gen("0(%rdi), %rax");                         // load vtable address into %rax
+        codeGen.gen("movq 0(%rdi), %rax");                         // load vtable address into %rax
         codeGen.gen("call *" + methodOffset + "(%rax)");      // call function whose address is at
                                                                  // the specified offset in the vtable
         for ( int i = 0; i < n.el.size(); i++ ) {

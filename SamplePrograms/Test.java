@@ -1,18 +1,17 @@
 class Test{
     public static void main(String[] a) {
-        {
-            new Person().testA();
-            new Person().testB();
-        }
+	System.out.println(new Person().testA());
     }
 }
 
 class Person {
-    public void testA() {
-        System.out.println("401");
+    public int testA() {
+        System.out.println(401);
+	return 1; 
     }
 
-    public void testB() {
+    public int testB() {
         System.out.println(2020);
+	return 1; 
     }
 }
