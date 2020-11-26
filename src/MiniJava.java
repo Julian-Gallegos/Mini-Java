@@ -23,8 +23,10 @@ public class MiniJava {
             parser p = new parser(s, sf);
             Symbol root = p.parse();
 
+	    System.out.println("Test: " + Arrays.toString(args));
+	    System.out.println("Test: " + args.length); 
             if (args.length == 1) {
-                // code generation
+                // code generatio 
                 Program program = (Program) root.value;
                 GeneratorVisitor gv = new GeneratorVisitor(program);
                 ErrorCheckVisitor ecv = new ErrorCheckVisitor(program, gv.symbolTable, gv.typeTable);
