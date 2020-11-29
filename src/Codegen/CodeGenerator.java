@@ -1,5 +1,9 @@
 package Codegen;
 
+import SemanticsAndTypes.*;
+
+import java.util.List;
+
 public class CodeGenerator {
     int stackCounter;
     int heapCounter;
@@ -8,6 +12,29 @@ public class CodeGenerator {
         stackCounter = 0;
         heapCounter = 0;  // may not need?
     }
+
+    /* TODO: List of information we need for assembly code generation. Many of these could be done in the symbol table generation,
+     *       but it might be easier to just compute on the fly.
+     * *     Make method that generates the vtables for each class, make sure it keeps order of inherited methods consistent
+     *       with the super class methods.
+     * *     Maybe make helper method that takes all classes from symbol table and creates a set of lists for each class hierarchy
+     *
+     * *
+     */
+
+    /*
+    public void GenerateVTables(SymbolTable symTable) {
+        ClassScope currClass;
+        List<ArgumentType> arguments;
+        List<MethodScope> vtable;
+        List<String> classNames;
+
+        for (String className : symTable.globalScope.keySet()) {
+
+        }
+
+    }
+    */
 
     public void pushQ(String register) {
         gen("pushq " + register);
