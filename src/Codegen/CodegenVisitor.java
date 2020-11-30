@@ -256,6 +256,7 @@ public class CodegenVisitor implements Visitor {
         n.i.accept(this);
 
         int objOffset = symbolTable.getClassOffset(((NewObject) n.e).i.s);
+        // method offset depends on position in vtable, should just be calculated as 1,2,3,4...
         int methodOffset = symbolTable.getClassScope(((NewObject) n.e).i.s).getMethodOffset(n.i.s);
 
         codeGen.gen("movq " + objOffset + "(%rbp), %rdi");    // first argument is obj prt ("this")
