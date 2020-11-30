@@ -7,19 +7,21 @@ asm_main:
 	movq %rdx, 0(%rax)
 	movq 0(%rbp), %rdi
 	movq 0(%rdi), %rax
-	call *0(%rax)
+	call *8(%rax)
 	movq %rax, %rdi
 	call put
-Person$$: .quad 0
-	.quad Person$testA
-	.quad Person$testB
-testA:
+	.data
+Person$testA:
 	movq $401, %rax
 	movq %rax, %rdi
 	call put
 	movq $1, %rax
-testB:
-	movq $2020, %rax
-	movq %rax, %rdi
-	call put
-	movq $1, %rax
+Person$testB:
+        movq $2020, %rax
+        movq %rax, %rdi
+        call put
+        movq $1, %rax
+	.data
+Person$$: .quad 0
+        .quad Person$testA
+	.quad Person$testB
