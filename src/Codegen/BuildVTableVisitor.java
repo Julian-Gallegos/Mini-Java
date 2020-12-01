@@ -5,19 +5,34 @@ import AST.Visitor.Visitor;
 import SemanticsAndTypes.ClassScope;
 import SemanticsAndTypes.SymbolTable;
 
-public class CodegenVisitor implements Visitor {
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public class BuildVTableVisitor implements Visitor {
+    private Map<String, List<String>> vTables;
+
     private CodeGenerator codeGen;
     private SymbolTable symbolTable;
-    private BuildVTableVisitor buildVTableVisitor;
+
     private String currentClass;
 
-
-    public CodegenVisitor(Program root, SymbolTable symbolTable, BuildVTableVisitor buildVTableVisitor) {
+    public BuildVTableVisitor(Program root, SymbolTable symbolTable) {
+        vTables = new HashMap<String, List<String>>();
         this.symbolTable = symbolTable;
         codeGen = new CodeGenerator();
         root.accept(this);
         currentClass = null;
-        this.buildVTableVisitor = buildVTableVisitor;
+    }
+
+    public void printVTable() {
+        for (String classLabel : vTables.keySet()) {
+            System.out.print(classLabel);
+            for (String classMethod : vTables.get(classLabel)) {
+                System.out.println(classMethod);
+            }
+        }
     }
 
     // Display added for toy example language.  Not used in regular MiniJava
@@ -28,34 +43,18 @@ public class CodegenVisitor implements Visitor {
     // MainClass m;
     // ClassDeclList cl;
     public void visit(Program n) {
-        codeGen.gen(".text");
-        codeGen.gen(".globl asm_main");
-
         n.m.accept(this);
         for ( int i = 0; i < n.cl.size(); i++ ) {
             n.cl.get(i).accept(this);
         }
-        // print v table
-        codeGen.gen(".data");
-        buildVTableVisitor.printVTable();
-
     }
 
     // Identifier i1,i2;
     // Statement s;
     public void visit(MainClass n) {
-        codeGen.genLabel("asm_main");
-        //System.out.print("class ");
         n.i1.accept(this);
-        //System.out.println(" {");
-        //System.out.print("  public static void main (String [] ");
         n.i2.accept(this);
-        //System.out.println(") {");
-        //System.out.print("    ");
         n.s.accept(this);
-        codeGen.gen("ret");
-        //System.out.println("  }");
-        //System.out.println("}");
     }
 
     // Identifier i;
@@ -63,11 +62,14 @@ public class CodegenVisitor implements Visitor {
     // MethodDeclList ml;
     public void visit(ClassDeclSimple n) {
         currentClass = n.i.s;
-        //System.out.print("class ");
         n.i.accept(this);
-        //System.out.println(" { ");
         for ( int i = 0; i < n.vl.size(); i++ ) {
             n.vl.get(i).accept(this);
+        }
+        vTables.put(codeGen.vtableHeader(n.i.s, "0"), new ArrayList<String>());
+        for ( int i = 0; i < n.ml.size(); i++ ) {
+            vTables.get(codeGen.vtableHeader(n.i.s, "0"))
+                    .add("\t.quad " + n.i.s + "$" + n.ml.get(i).i.s);
         }
         for ( int i = 0; i < n.ml.size(); i++ ) {
             n.ml.get(i).accept(this);
@@ -80,9 +82,7 @@ public class CodegenVisitor implements Visitor {
     // MethodDeclList ml;
     public void visit(ClassDeclExtends n) {
         currentClass = n.i.s;
-        //System.out.print("class ");
         n.i.accept(this);
-        //System.out.println(" extends ");
         n.j.accept(this);
         for ( int i = 0; i < n.vl.size(); i++ ) {
             n.vl.get(i).accept(this);
@@ -106,10 +106,7 @@ public class CodegenVisitor implements Visitor {
     // StatementList sl;
     // Exp e;
     public void visit(MethodDecl n) {
-        //System.out.print("  public ");
-        // className$Method
         n.t.accept(this);
-        codeGen.genLabel(currentClass + "$" + n.i.s);
         n.i.accept(this);
         for ( int i = 0; i < n.fl.size(); i++ ) {
             n.fl.get(i).accept(this);
@@ -120,8 +117,6 @@ public class CodegenVisitor implements Visitor {
         for ( int i = 0; i < n.sl.size(); i++ ) {
             n.sl.get(i).accept(this);
         }
-        //System.out.print("    return ");
-        codeGen.gen("ret");
         n.e.accept(this);
     }
 
@@ -170,12 +165,6 @@ public class CodegenVisitor implements Visitor {
     // Exp e;
     public void visit(Print n) {
         n.e.accept(this);
-        /*
-        movq    $5,%rdi     # System.out.println(5)
-        call    _put
-         */
-        codeGen.gen("movq %rax, %rdi");
-        codeGen.put();
     }
 
     // Identifier i;
@@ -189,9 +178,7 @@ public class CodegenVisitor implements Visitor {
     // Exp e1,e2;
     public void visit(ArrayAssign n) {
         n.i.accept(this);
-        //System.out.print("[");
         n.e1.accept(this);
-        //System.out.print("] = ");
         n.e2.accept(this);
     }
 
@@ -209,53 +196,31 @@ public class CodegenVisitor implements Visitor {
 
     // Exp e1,e2;
     public void visit(Plus n) {
-        // generate code to eval e1, result in %rax
         n.e1.accept(this);
-
-        // push e1 onto stack
-        codeGen.pushQ("%rax");
-
-        // generate code to eval e2, result in %rax
         n.e2.accept(this);
-
-        // pop left argument into %rdx; clean up stack
-        codeGen.popQ("%rdx");
-
-        // perform the addition; result in %rax
-        codeGen.gen("addq %rdx, %rax");
     }
 
     // Exp e1,e2;
     public void visit(Minus n) {
         n.e1.accept(this);
-        codeGen.pushQ("%rax");
         n.e2.accept(this);
-        codeGen.popQ("%rdx");
-        codeGen.gen("negq %rax");
-        codeGen.gen("addq %rdx, %rax");
     }
 
     // Exp e1,e2;
     public void visit(Times n) {
         n.e1.accept(this);
-        codeGen.pushQ("%rax");
         n.e2.accept(this);
-        codeGen.popQ("%rdx");
-        codeGen.gen("imulq %rdx, %rax");
     }
 
     // Exp e1,e2;
     public void visit(ArrayLookup n) {
         n.e1.accept(this);
-        //System.out.print("[");
         n.e2.accept(this);
-        //System.out.print("]");
     }
 
     // Exp e;
     public void visit(ArrayLength n) {
         n.e.accept(this);
-        //System.out.print(".length");
     }
 
     // Exp e;
@@ -263,21 +228,7 @@ public class CodegenVisitor implements Visitor {
     // ExpList el;
     public void visit(Call n) {
         n.e.accept(this);
-        //System.out.print(".");
         n.i.accept(this);
-
-        int objOffset = symbolTable.getClassOffset(((NewObject) n.e).i.s);
-        // method offset depends on position in vtable, should just be calculated as 1,2,3,4...
-        int methodOffset = symbolTable.getClassScope(((NewObject) n.e).i.s).getMethodOffset(n.i.s);
-
-        //codeGen.gen("movq %rax, %rdi");
-        codeGen.gen("movq 0(%rax), %rax");
-        codeGen.gen("call *" + methodOffset + "(%rax)");
-
-        //codeGen.gen("movq " + objOffset + "(%rbp), %rdi");    // first argument is obj prt ("this")
-        //codeGen.gen("movq 0(%rdi), %rax");                         // load vtable address into %rax
-        //codeGen.gen("call *" + methodOffset + "(%rax)");      // call function whose address is at
-                                                                 // the specified offset in the vtable
         for ( int i = 0; i < n.el.size(); i++ ) {
             n.el.get(i).accept(this);
         }
@@ -285,20 +236,16 @@ public class CodegenVisitor implements Visitor {
 
     // int i;
     public void visit(IntegerLiteral n) {
-        codeGen.gen("movq $" + n.i + ", %rax");
     }
 
     public void visit(True n) {
-        codeGen.gen("movq 0 %rax");
     }
 
     public void visit(False n) {
-        codeGen.gen("movq 1 %rax");
     }
 
     // String s;
     public void visit(IdentifierExp n) {
-        codeGen.gen("movq varoffset(%rbp), %rax");
     }
 
     public void visit(This n) {
@@ -306,27 +253,14 @@ public class CodegenVisitor implements Visitor {
 
     // Exp e;
     public void visit(NewArray n) {
-        //System.out.print("new int [");
         n.e.accept(this);
-        //System.out.print("]");
     }
 
     // Identifier i;
-    public void visit(NewObject n) {
-        codeGen.callocNewObject(8);
-        codeGen.gen("leaq " + n.i.s + "$$, %rdx");  // get method table address
-        codeGen.gen("movq %rdx, 0(%rax)");                // store vtbl ptr at beginning of object
-        //codeGen.gen("%rax, %rdi");                        // set up "this" for constructor
-        //codeGen.gen("%rax, [offsetTemp](%rbp)");          // save "this" for later (or maybe pushq)
-        // load constructor arguments
-        //codeGen.gen(n.i.s + "$" + n.i.s);                 // call ctor if we have one (no vtbl lookup)
-        //codeGen.gen("[offsetTemp](%rbp), %rax");          // recover ptr to object
-        //codeGen.gen("%rax, [offsetOne](%rbp)");            // store object reference in variable one
-    }
+    public void visit(NewObject n) { }
 
     // Exp e;
     public void visit(Not n) {
-        //System.out.print("!");
         n.e.accept(this);
     }
 

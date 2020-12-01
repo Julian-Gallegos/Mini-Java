@@ -1,3 +1,4 @@
+import Codegen.BuildVTableVisitor;
 import Codegen.CodegenVisitor;
 import Scanner.*;
 import Parser.*;
@@ -29,7 +30,8 @@ public class MiniJava {
                 GeneratorVisitor gv = new GeneratorVisitor(program);
 		        // ErrorCheckVisitor ecv = new ErrorCheckVisitor(program, gv.symbolTable, gv.typeTable);
                 //if (!ecv.errorsInProgram()) {
-		        CodegenVisitor cv = new CodegenVisitor(program, gv.symbolTable);
+                BuildVTableVisitor vTableVisitor = new BuildVTableVisitor(program, gv.symbolTable);
+                CodegenVisitor codegenVisitor = new CodegenVisitor(program, gv.symbolTable, vTableVisitor);
 		        System.exit(0);
                 //} else {
 		            // errors found in program

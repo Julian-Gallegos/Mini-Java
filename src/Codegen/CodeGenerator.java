@@ -72,10 +72,11 @@ public class CodeGenerator {
      *                      if 'className' extends no objects, it
      *                      will be '0'.
      */
-    public void vtableHeader(String className, String superClass) {
+    public String vtableHeader(String className, String superClass) {
         String str = className + "$$: .quad " + superClass;
         str += superClass.equals("0") ? "" : "$$";
-        System.out.println(str);
+        return str;
+        //System.out.println(str);
     }
 
     /**
