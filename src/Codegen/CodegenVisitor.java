@@ -2,16 +2,21 @@ package Codegen;
 
 import AST.*;
 import AST.Visitor.Visitor;
+import SemanticsAndTypes.ClassScope;
 import SemanticsAndTypes.SymbolTable;
 
 public class CodegenVisitor implements Visitor {
     private CodeGenerator codeGen;
     private SymbolTable symbolTable;
 
+    private String currentClass;
+
+
     public CodegenVisitor(Program root, SymbolTable symbolTable) {
         this.symbolTable = symbolTable;
         codeGen = new CodeGenerator();
         root.accept(this);
+        currentClass = null;
     }
 
     // Display added for toy example language.  Not used in regular MiniJava
@@ -51,6 +56,7 @@ public class CodegenVisitor implements Visitor {
     // VarDeclList vl;
     // MethodDeclList ml;
     public void visit(ClassDeclSimple n) {
+        currentClass = n.i.s;
         //System.out.print("class ");
         n.i.accept(this);
         //System.out.println(" { ");
@@ -58,9 +64,9 @@ public class CodegenVisitor implements Visitor {
             n.vl.get(i).accept(this);
         }
         codeGen.vtableHeader(n.i.s, "0");
-	for ( int i = 0; i < n.ml.size(); i++ ) {
-	    codeGen.gen(".quad " + n.i.s + "$" + n.ml.get(i).i.s); 
-	}
+        for ( int i = 0; i < n.ml.size(); i++ ) {
+            codeGen.gen(".quad " + n.i.s + "$" + n.ml.get(i).i.s);
+        }
         for ( int i = 0; i < n.ml.size(); i++ ) {
             n.ml.get(i).accept(this);
         }
@@ -71,6 +77,7 @@ public class CodegenVisitor implements Visitor {
     // VarDeclList vl;
     // MethodDeclList ml;
     public void visit(ClassDeclExtends n) {
+        currentClass = n.i.s;
         //System.out.print("class ");
         n.i.accept(this);
         //System.out.println(" extends ");
@@ -98,8 +105,9 @@ public class CodegenVisitor implements Visitor {
     // Exp e;
     public void visit(MethodDecl n) {
         //System.out.print("  public ");
+        // className$Method
         n.t.accept(this);
-        codeGen.genLabel(n.i.s);
+        codeGen.genLabel(currentClass + "$" + n.i.s);
         n.i.accept(this);
         for ( int i = 0; i < n.fl.size(); i++ ) {
             n.fl.get(i).accept(this);
