@@ -106,7 +106,6 @@ public class CodegenVisitor implements Visitor {
     // Exp e;
     public void visit(MethodDecl n) {
         //System.out.print("  public ");
-        // className$Method
         n.t.accept(this);
         codeGen.genLabel(currentClass + "$" + n.i.s);
         n.i.accept(this);
@@ -121,7 +120,7 @@ public class CodegenVisitor implements Visitor {
         }
         //System.out.print("    return ");
         n.e.accept(this);
-	codeGen.gen("ret");
+	    codeGen.gen("ret");
     }
 
     // Type t;
@@ -265,7 +264,7 @@ public class CodegenVisitor implements Visitor {
         //System.out.print(".");
         n.i.accept(this);
 
-        int objOffset = symbolTable.getClassOffset(((NewObject) n.e).i.s);
+        //int objOffset = symbolTable.getClassOffset(((NewObject) n.e).i.s);
         // method offset depends on position in vtable, should just be calculated as 1,2,3,4...
         int methodOffset = symbolTable.getClassScope(((NewObject) n.e).i.s).getMethodOffset(n.i.s);
 
