@@ -14,10 +14,10 @@ public class CodegenVisitor implements Visitor {
 
     public CodegenVisitor(Program root, SymbolTable symbolTable, BuildVTableVisitor buildVTableVisitor) {
         this.symbolTable = symbolTable;
+	this.buildVTableVisitor = buildVTableVisitor;
         codeGen = new CodeGenerator();
         root.accept(this);
         currentClass = null;
-        this.buildVTableVisitor = buildVTableVisitor;
     }
 
     // Display added for toy example language.  Not used in regular MiniJava
@@ -38,7 +38,6 @@ public class CodegenVisitor implements Visitor {
         // print v table
         codeGen.gen(".data");
         buildVTableVisitor.printVTable();
-
     }
 
     // Identifier i1,i2;
@@ -121,8 +120,8 @@ public class CodegenVisitor implements Visitor {
             n.sl.get(i).accept(this);
         }
         //System.out.print("    return ");
-        codeGen.gen("ret");
         n.e.accept(this);
+	codeGen.gen("ret");
     }
 
     // Type t;

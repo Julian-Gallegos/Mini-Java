@@ -28,7 +28,7 @@ public class BuildVTableVisitor implements Visitor {
 
     public void printVTable() {
         for (String classLabel : vTables.keySet()) {
-            System.out.print(classLabel);
+            System.out.println(classLabel);
             for (String classMethod : vTables.get(classLabel)) {
                 System.out.println(classMethod);
             }
