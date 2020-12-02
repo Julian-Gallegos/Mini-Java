@@ -1,15 +1,15 @@
 class Test{
     public static void main(String[] a) {
-        System.out.println(new Person().incrementAge(40));
+        System.out.println(new Person().incrementAge());
     }
 }
 
 class Person {
-    public int incrementAge(int age) {
+    public int incrementAge() {
         int i;
         int j;
         i = 30;
-        j = i + age;
+        j = i;
         System.out.print(j);
         return 1;
     }

@@ -296,7 +296,22 @@ public class CodegenVisitor implements Visitor {
         //int objOffset = symbolTable.getClassOffset(((NewObject) n.e).i.s);
         // method offset depends on position in vtable, should just be calculated as 1,2,3,4...
         int methodOffset = symbolTable.getClassScope(((NewObject) n.e).i.s).getMethodOffset(n.i.s);
-
+        for (int i = 0; i < n.el.size(); i++) {
+            n.el.get(i).accept(this);
+            String argumentRegister = null;
+            if (i == 0) {
+                argumentRegister = "%rdi";
+            } else if (i == 1) {
+                argumentRegister = "%rsi";
+            } else if (i == 2) {
+                argumentRegister = "%rdx";
+            } else if (i == 3) {
+                argumentRegister = "%rcx";
+            } else if (i == 4) {
+                argumentRegister = "%r8";
+            } // do not need to handle case where there is more than 5 parameters
+            codeGen.gen("movq %rax, " + argumentRegister);
+        }
         //codeGen.gen("movq %rax, %rdi");
         codeGen.gen("movq 0(%rax), %rax");
         codeGen.gen("call *" + methodOffset + "(%rax)");
