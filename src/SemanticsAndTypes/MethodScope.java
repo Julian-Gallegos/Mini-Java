@@ -8,6 +8,7 @@ import java.util.Map;
 public class MethodScope {
 
     public Map<String, String> methodVariables;
+    public Map<String, Integer> variableOffsets;
     public String methodType;
     // list tuple elements storing the name & type of argument.
     public List<ArgumentType> arguments;
@@ -15,6 +16,7 @@ public class MethodScope {
     public MethodScope(String methodType) {
         this.methodType = methodType;
         methodVariables = new HashMap<>();
+        variableOffsets = new HashMap<>();
         arguments = new ArrayList<ArgumentType>();
     }
 

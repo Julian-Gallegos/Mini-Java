@@ -6,8 +6,10 @@ class Test{
 
 class Person {
     public int incrementAge(int age) {
-        int i = 30;
-        int j = i + age;
+        int i;
+        int j;
+        i = 30;
+        j = i + age;
         System.out.print(j);
         return 1;
     }

@@ -3,21 +3,39 @@ package Codegen;
 import AST.*;
 import AST.Visitor.Visitor;
 import SemanticsAndTypes.ClassScope;
+import SemanticsAndTypes.MethodScope;
 import SemanticsAndTypes.SymbolTable;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class CodegenVisitor implements Visitor {
     private CodeGenerator codeGen;
     private SymbolTable symbolTable;
     private BuildVTableVisitor buildVTableVisitor;
     private String currentClass;
+    private List<String> vars;
+    private String currentmethod;
 
 
     public CodegenVisitor(Program root, SymbolTable symbolTable, BuildVTableVisitor buildVTableVisitor) {
         this.symbolTable = symbolTable;
-	this.buildVTableVisitor = buildVTableVisitor;
+	    this.buildVTableVisitor = buildVTableVisitor;
         codeGen = new CodeGenerator();
-        root.accept(this);
+        // TODO: put in helper method
+        // Set offsets for local variables at each method context.
+        for (ClassScope classScope:symbolTable.globalScope.values()) {
+            for (MethodScope method:classScope.methodMap.values()) {
+                int i = 0;
+                for (String variable: method.methodVariables.keySet()) {
+                    method.variableOffsets.put(variable, i*8);
+                    i++;
+                }
+            }
+        }
         currentClass = null;
+        currentmethod = null;
+        root.accept(this);
     }
 
     // Display added for toy example language.  Not used in regular MiniJava
@@ -51,8 +69,9 @@ public class CodegenVisitor implements Visitor {
         n.i2.accept(this);
         //System.out.println(") {");
         //System.out.print("    ");
+        prologue();
         n.s.accept(this);
-        codeGen.gen("ret");
+        epilogue();
         //System.out.println("  }");
         //System.out.println("}");
     }
@@ -105,14 +124,21 @@ public class CodegenVisitor implements Visitor {
     // StatementList sl;
     // Exp e;
     public void visit(MethodDecl n) {
+        currentmethod = n.i.s;
         //System.out.print("  public ");
         n.t.accept(this);
         codeGen.genLabel(currentClass + "$" + n.i.s);
+        prologue();
         n.i.accept(this);
         for ( int i = 0; i < n.fl.size(); i++ ) {
             n.fl.get(i).accept(this);
         }
+        vars = new ArrayList<String>();
+        if (n.vl.size() > 0) {
+            codeGen.gen("subq $" + 8*n.vl.size() + ", %rsp");
+        }
         for ( int i = 0; i < n.vl.size(); i++ ) {
+            //TODO: maybe do this? vars.add(n.vl.get(i).i.s);
             n.vl.get(i).accept(this);
         }
         for ( int i = 0; i < n.sl.size(); i++ ) {
@@ -120,7 +146,7 @@ public class CodegenVisitor implements Visitor {
         }
         //System.out.print("    return ");
         n.e.accept(this);
-	    codeGen.gen("ret");
+        epilogue();
     }
 
     // Type t;
@@ -179,8 +205,11 @@ public class CodegenVisitor implements Visitor {
     // Identifier i;
     // Exp e;
     public void visit(Assign n) {
+        //TODO: currently just handles method variables, does not handle class instance variables.
+        int varOffset = symbolTable.getClassScope(currentClass).getMethodScope(currentmethod).variableOffsets.get(n.i.s);
         n.i.accept(this);
         n.e.accept(this);
+        codeGen.gen("movq %rax, -" + varOffset + "(%rbp)");
     }
 
     // Identifier i;
@@ -296,7 +325,9 @@ public class CodegenVisitor implements Visitor {
 
     // String s;
     public void visit(IdentifierExp n) {
-        codeGen.gen("movq varoffset(%rbp), %rax");
+        //TODO: currently just handles method variables, does not handle class instance variables.
+        int varOffset = symbolTable.getClassScope(currentClass).getMethodScope(currentmethod).variableOffsets.get(n.s);
+        codeGen.gen("movq -" + varOffset + "(%rbp), %rax");
     }
 
     public void visit(This n) {
@@ -331,4 +362,16 @@ public class CodegenVisitor implements Visitor {
     // String s;
     public void visit(Identifier n) {
     }
+
+    private void prologue() {
+        codeGen.gen("pushq %rbp");
+        codeGen.gen("movq %rsp, %rbp");
+    }
+
+    private void epilogue() {
+        codeGen.gen("movq %rbp, %rsp");
+        codeGen.gen("popq %rbp");
+        codeGen.gen("ret");
+    }
+
 }
