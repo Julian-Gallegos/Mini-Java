@@ -209,7 +209,7 @@ public class CodegenVisitor implements Visitor {
         int varOffset = symbolTable.getClassScope(currentClass).getMethodScope(currentmethod).variableOffsets.get(n.i.s);
         n.i.accept(this);
         n.e.accept(this);
-        codeGen.gen("movq %rax, -" + varOffset + "(%rbp)");
+        codeGen.gen("movq %rax, -" + (varOffset+8) + "(%rbp)");
     }
 
     // Identifier i;
@@ -342,7 +342,7 @@ public class CodegenVisitor implements Visitor {
     public void visit(IdentifierExp n) {
         //TODO: currently just handles method variables, does not handle class instance variables.
         int varOffset = symbolTable.getClassScope(currentClass).getMethodScope(currentmethod).variableOffsets.get(n.s);
-        codeGen.gen("movq -" + varOffset + "(%rbp), %rax");
+        codeGen.gen("movq -" + (varOffset+8) + "(%rbp), %rax");
     }
 
     public void visit(This n) {
