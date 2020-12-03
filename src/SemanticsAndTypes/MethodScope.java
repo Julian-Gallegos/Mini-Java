@@ -20,6 +20,7 @@ public class MethodScope {
         arguments = new ArrayList<ArgumentType>();
     }
 
+
     // assumes the name 'argName' is contained in the arguments list
     public int getArgumentOffset(String argName) {
         for (ArgumentType at : arguments) {

@@ -18,7 +18,6 @@ public class CodegenVisitor implements Visitor {
     private List<String> vars;
     private String currentmethod;
 
-
     public CodegenVisitor(Program root, SymbolTable symbolTable, BuildVTableVisitor buildVTableVisitor) {
         this.symbolTable = symbolTable;
 	    this.buildVTableVisitor = buildVTableVisitor;
@@ -346,6 +345,10 @@ public class CodegenVisitor implements Visitor {
             codeGen.gen("movq %rax, " + argumentRegister);
         }
         //codeGen.gen("movq %rax, %rdi");
+        // if (symbolTable.getClassScope(currentClass).getMethodScope(currentmethod).newClasses.contains(new ...()))
+        //      -> offset = symbolTable.getClassScope(currentClass).getMethodScope(currentmethod).getClassOffset(...)
+        // else -> offset = -1; TODO
+        // NOTE: codeGen.gen("movq " + );
         codeGen.gen("movq 0(%rax), %rax");
         codeGen.gen("call *" + methodOffset + "(%rax)");
 
