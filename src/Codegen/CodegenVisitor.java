@@ -374,8 +374,17 @@ public class CodegenVisitor implements Visitor {
     // String s;
     public void visit(IdentifierExp n) {
         //TODO: currently just handles method variables, does not handle class instance variables.
-        int varOffset = symbolTable.getClassScope(currentClass).getMethodScope(currentmethod).variableOffsets.get(n.s);
-        codeGen.gen("movq -" + (varOffset+8) + "(%rbp), %rax");
+        int offset;
+        if (symbolTable.getClassScope(currentClass).getMethodScope(currentmethod).methodVariables.containsKey(n.s)) {
+            offset = symbolTable.getClassScope(currentClass).getMethodScope(currentmethod).variableOffsets.get(n.s);
+        } else if (symbolTable.getClassScope(currentClass).getMethodScope(currentmethod).arguments.contains(new ArgumentType(n.s, "n/a"))) {
+            offset = symbolTable.getClassScope(currentClass).getMethodScope(currentmethod).getArgumentOffset(n.s);
+        } else {
+            // fields of obj
+            System.out.println("This is a bug, shouldn't be here!");
+            offset = -1;
+        }
+        codeGen.gen("movq -" + (offset + 8) + "(%rbp), %rax");
     }
 
     public void visit(This n) {
