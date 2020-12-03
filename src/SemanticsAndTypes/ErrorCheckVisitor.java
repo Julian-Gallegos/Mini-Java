@@ -520,6 +520,18 @@ public class ErrorCheckVisitor implements Visitor {
 
     // Exp e;
     public void visit(Print n) {
+        // TAG - bug fixes
+        if (n.e instanceof IdentifierExp) {
+            // want to check if the identifier expression is an int
+            if (!isArithmeticExpression(n.e)) {
+                System.out.println("Error (line " + n.e.line_number + ") print applied to non-int expression.");
+            }
+        }
+        if (n.e instanceof Call) {
+            // check that the method call is an int
+        }
+
+
         n.e.accept(this);
     }
 

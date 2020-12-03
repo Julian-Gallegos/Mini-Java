@@ -2,6 +2,7 @@ package Codegen;
 
 import AST.*;
 import AST.Visitor.Visitor;
+import SemanticsAndTypes.ArgumentType;
 import SemanticsAndTypes.ClassScope;
 import SemanticsAndTypes.MethodScope;
 import SemanticsAndTypes.SymbolTable;
@@ -24,12 +25,15 @@ public class CodegenVisitor implements Visitor {
         codeGen = new CodeGenerator();
         // TODO: put in helper method
         // Set offsets for local variables at each method context.
-        for (ClassScope classScope:symbolTable.globalScope.values()) {
-            for (MethodScope method:classScope.methodMap.values()) {
+        for (ClassScope classScope : symbolTable.globalScope.values()) {
+            for (MethodScope method : classScope.methodMap.values()) {
                 int i = 0;
-                for (String variable: method.methodVariables.keySet()) {
+                for (String variable : method.methodVariables.keySet()) {
                     method.variableOffsets.put(variable, i*8);
                     i++;
+                }
+                for (ArgumentType methodArg : method.arguments) {
+                    methodArg.setVariableOffset(8 * (i++));
                 }
             }
         }
@@ -137,6 +141,19 @@ public class CodegenVisitor implements Visitor {
         if (n.vl.size() > 0) {
             codeGen.gen("subq $" + 8*n.vl.size() + ", %rsp");
         }
+        for (int i = 0; i < n.fl.size(); i++) {
+            if (i == 0) {
+                codeGen.gen("pushq %rdi");
+            } else if (i == 1) {
+                codeGen.gen("pushq %rsi");
+            } else if (i == 2) {
+                codeGen.gen("pushq %rdx");
+            } else if (i == 3) {
+                codeGen.gen("pushq %rcx");
+            } else if (i == 4) {
+                codeGen.gen("pushq %r8");
+            }
+        }
         for ( int i = 0; i < n.vl.size(); i++ ) {
             //TODO: maybe do this? vars.add(n.vl.get(i).i.s);
             n.vl.get(i).accept(this);
@@ -179,6 +196,7 @@ public class CodegenVisitor implements Visitor {
     // Exp e;
     // Statement s1,s2;
     public void visit(If n) {
+        codeGen.printComment("Entering if statement.");
         n.e.accept(this);
         n.s1.accept(this);
         n.s2.accept(this);
@@ -206,10 +224,19 @@ public class CodegenVisitor implements Visitor {
     // Exp e;
     public void visit(Assign n) {
         //TODO: currently just handles method variables, does not handle class instance variables.
-        int varOffset = symbolTable.getClassScope(currentClass).getMethodScope(currentmethod).variableOffsets.get(n.i.s);
+        int offset;
+        if (symbolTable.getClassScope(currentClass).getMethodScope(currentmethod).methodVariables.containsKey(n.i.s)) {
+            offset = symbolTable.getClassScope(currentClass).getMethodScope(currentmethod).variableOffsets.get(n.i.s);
+        } else if (symbolTable.getClassScope(currentClass).getMethodScope(currentmethod).arguments.contains(new ArgumentType(n.i.s, "n/a"))) {
+            offset = symbolTable.getClassScope(currentClass).getMethodScope(currentmethod).getArgumentOffset(n.i.s);
+        } else {
+            // fields of obj
+            System.out.println("This is a bug, shouldn't be here!");
+            offset = -1;
+        }
         n.i.accept(this);
         n.e.accept(this);
-        codeGen.gen("movq %rax, -" + (varOffset+8) + "(%rbp)");
+        codeGen.gen("movq %rax, -" + (offset + 8) + "(%rbp)");
     }
 
     // Identifier i;
@@ -231,7 +258,13 @@ public class CodegenVisitor implements Visitor {
     // Exp e1,e2;
     public void visit(LessThan n) {
         n.e1.accept(this);
+        // gen(pushq %rax)
         n.e2.accept(this);
+        // gen(popq %rdx)
+        // gen(cmpq %rdx, %rax)
+        // gen(condjump targetLabel)
+        //      - a variable assignment, or to some code block
+        //      boolean a = 2 < 3 || if (2 < 3) { ... } else { ... }
     }
 
     // Exp e1,e2;

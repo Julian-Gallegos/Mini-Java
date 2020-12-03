@@ -20,6 +20,16 @@ public class MethodScope {
         arguments = new ArrayList<ArgumentType>();
     }
 
+    // assumes the name 'argName' is contained in the arguments list
+    public int getArgumentOffset(String argName) {
+        for (ArgumentType at : arguments) {
+            if (at.name.equals(argName)) {
+                return at.offset;
+            }
+        }
+        return -1;
+    }
+
     public void insertArgument(ArgumentType t) {
         arguments.add(t);
     }

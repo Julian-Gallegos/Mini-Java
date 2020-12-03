@@ -92,6 +92,10 @@ public class CodeGenerator {
     }
 
 
+    public void printComment(String comment) {
+        System.out.println("# " + comment);
+    }
+
 
 
     // ================ METHODS WE MAY NOT NEED ================
