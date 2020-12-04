@@ -404,8 +404,6 @@ public class CodegenVisitor implements Visitor {
         codeGen.gen("leaq " + n.i.s + "$$, %rdx");  // get method table address
         codeGen.gen("movq %rdx, 0(%rax)");                // store vtbl ptr at beginning of object
 
-        codeGen.gen("pushq %rax");
-
         //numNewClasses = currentclass.currentmethod.newClasses.size;
 
         //codeGen.gen("%rax, %rdi");                        // set up "this" for constructor
