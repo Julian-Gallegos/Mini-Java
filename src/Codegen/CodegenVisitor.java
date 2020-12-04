@@ -151,6 +151,8 @@ public class CodegenVisitor implements Visitor {
                 codeGen.gen("pushq %rcx");
             } else if (i == 4) {
                 codeGen.gen("pushq %r8");
+            } else if (i == 5) {
+                codeGen.gen("pushq %r9");
             }
         }
         for ( int i = 0; i < n.vl.size(); i++ ) {
@@ -337,6 +339,9 @@ public class CodegenVisitor implements Visitor {
         } else if (n.e instanceof IdentifierExp) {
             methodOffset = symbolTable.getClassScope(((IdentifierExp)n.e).s).getMethodOffset(n.i.s);
         }
+
+        // movq
+
         for (int i = 0; i < n.el.size(); i++) {
             n.el.get(i).accept(this);
             String argumentRegister = null;
@@ -350,7 +355,9 @@ public class CodegenVisitor implements Visitor {
                 argumentRegister = "%rcx";
             } else if (i == 4) {
                 argumentRegister = "%r8";
-            } // do not need to handle case where there is more than 5 parameters
+            } else if (i == 5) {
+                argumentRegister = "%r9";
+            }
             codeGen.gen("movq %rax, " + argumentRegister);
         }
 
@@ -396,6 +403,7 @@ public class CodegenVisitor implements Visitor {
     }
 
     public void visit(This n) {
+        codeGen.gen("movq %rdi, %rax");
     }
 
     // Exp e;
