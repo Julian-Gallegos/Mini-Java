@@ -341,21 +341,18 @@ public class CodegenVisitor implements Visitor {
         }
 
         // movq
-
         for (int i = 0; i < n.el.size(); i++) {
             n.el.get(i).accept(this);
             String argumentRegister = null;
             if (i == 0) {
-                argumentRegister = "%rdi";
-            } else if (i == 1) {
                 argumentRegister = "%rsi";
-            } else if (i == 2) {
+            } else if (i == 1) {
                 argumentRegister = "%rdx";
-            } else if (i == 3) {
+            } else if (i == 2) {
                 argumentRegister = "%rcx";
-            } else if (i == 4) {
+            } else if (i == 3) {
                 argumentRegister = "%r8";
-            } else if (i == 5) {
+            } else if (i == 4) {
                 argumentRegister = "%r9";
             }
             codeGen.gen("movq %rax, " + argumentRegister);
