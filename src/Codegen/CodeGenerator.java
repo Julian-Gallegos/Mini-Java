@@ -5,12 +5,14 @@ import SemanticsAndTypes.*;
 import java.util.List;
 
 public class CodeGenerator {
-    int stackCounter;
-    int heapCounter;
+    public int stackCounter;
+    public int heapCounter;
+    private boolean aligned;
 
     public CodeGenerator() {
         stackCounter = 0;
         heapCounter = 0;  // may not need?
+        aligned = false;
     }
 
     /* TODO: List of information we need for assembly code generation. Many of these could be done in the symbol table generation,
@@ -36,16 +38,6 @@ public class CodeGenerator {
     }
     */
 
-    public void pushQ(String register) {
-        gen("pushq " + register);
-        stackCounter++;
-    }
-
-    public void popQ(String register) {
-        gen("popq " + register);
-        stackCounter--;
-    }
-
     public void put() {
         System.out.println("\tcall put");
     }
@@ -56,6 +48,12 @@ public class CodeGenerator {
 
     // write code string s to .asm output
     public void gen(String s) {
+        String[] tokens = s.split(" ");
+        if (tokens[0].equals("pushq")) {
+            stackCounter += 8;
+        } else if (tokens[0].equals("popq")) {
+            stackCounter -= 8;
+        }
         System.out.println("\t" + s);
     }
 
@@ -91,9 +89,34 @@ public class CodeGenerator {
         heapCounter++;
     }
 
-
-    public void printComment(String comment) {
+    public void genComment(String comment) {
         System.out.println("# " + comment);
+    }
+
+    public void align() {
+        if (stackCounter % 16 != 0) {
+            // need to do alignment
+            this.gen("subq $8, %rsp");
+            stackCounter += 8;
+            aligned = true;
+        }
+    }
+
+    public void undoAlign() {
+        if (aligned) {
+            // undo a alignment previously done
+            this.gen("addq $8, %rsp");
+            stackCounter -= 8;
+            aligned = false;
+        }
+    }
+
+    public String genTestLabel() {
+        return null;
+    }
+
+    public String genBodyLabel() {
+        return null;
     }
 
 

@@ -16,7 +16,7 @@ public class CodegenVisitor implements Visitor {
     private BuildVTableVisitor buildVTableVisitor;
     private String currentClass;
     private List<String> vars;
-    private String currentmethod;
+    private String currentMethod;
 
     public CodegenVisitor(Program root, SymbolTable symbolTable, BuildVTableVisitor buildVTableVisitor) {
         this.symbolTable = symbolTable;
@@ -37,7 +37,7 @@ public class CodegenVisitor implements Visitor {
             }
         }
         currentClass = null;
-        currentmethod = null;
+        currentMethod = null;
         root.accept(this);
     }
 
@@ -127,7 +127,7 @@ public class CodegenVisitor implements Visitor {
     // StatementList sl;
     // Exp e;
     public void visit(MethodDecl n) {
-        currentmethod = n.i.s;
+        currentMethod = n.i.s;
         //System.out.print("  public ");
         n.t.accept(this);
         codeGen.genLabel(currentClass + "$" + n.i.s);
@@ -138,7 +138,7 @@ public class CodegenVisitor implements Visitor {
         }
         vars = new ArrayList<String>();
         if (n.vl.size() > 0) {
-            codeGen.gen("subq $" + 8*n.vl.size() + ", %rsp");
+            codeGen.gen("subq $" + 8 * n.vl.size() + ", %rsp");
         }
         for (int i = 0; i < n.fl.size(); i++) {
             if (i == 0) {
@@ -206,19 +206,24 @@ public class CodegenVisitor implements Visitor {
     // Exp e;
     // Statement s;
     public void visit(While n) {
+        codeGen.genComment("While loop");
+
+        // generate labels
+
+        // test condition
         n.e.accept(this);
+
+        // body
         n.s.accept(this);
     }
 
     // Exp e;
     public void visit(Print n) {
         n.e.accept(this);
-        /*
-        movq    $5,%rdi     # System.out.println(5)
-        call    _put
-         */
         codeGen.gen("movq %rax, %rdi");
+        // codeGen.align();
         codeGen.put();
+
     }
 
     // Identifier i;
@@ -226,10 +231,10 @@ public class CodegenVisitor implements Visitor {
     public void visit(Assign n) {
         //TODO: currently just handles method variables, does not handle class instance variables.
         int offset;
-        if (symbolTable.getClassScope(currentClass).getMethodScope(currentmethod).methodVariables.containsKey(n.i.s)) {
-            offset = symbolTable.getClassScope(currentClass).getMethodScope(currentmethod).variableOffsets.get(n.i.s);
-        } else if (symbolTable.getClassScope(currentClass).getMethodScope(currentmethod).arguments.contains(new ArgumentType(n.i.s, "n/a"))) {
-            offset = symbolTable.getClassScope(currentClass).getMethodScope(currentmethod).getArgumentOffset(n.i.s);
+        if (symbolTable.getClassScope(currentClass).getMethodScope(currentMethod).methodVariables.containsKey(n.i.s)) {
+            offset = symbolTable.getClassScope(currentClass).getMethodScope(currentMethod).variableOffsets.get(n.i.s);
+        } else if (symbolTable.getClassScope(currentClass).getMethodScope(currentMethod).arguments.contains(new ArgumentType(n.i.s, "n/a"))) {
+            offset = symbolTable.getClassScope(currentClass).getMethodScope(currentMethod).getArgumentOffset(n.i.s);
         } else {
             // fields of obj
             System.out.println("This is a bug, shouldn't be here!");
@@ -259,10 +264,11 @@ public class CodegenVisitor implements Visitor {
     // Exp e1,e2;
     public void visit(LessThan n) {
         n.e1.accept(this);
-        // gen(pushq %rax)
+        codeGen.gen("pushq %rax");
+
         n.e2.accept(this);
-        // gen(popq %rdx)
-        // gen(cmpq %rdx, %rax)
+        codeGen.gen("popq %rdx");
+        codeGen.gen("cmpq %rdx, %rax");
         // gen(condjump targetLabel)
         //      - a variable assignment, or to some code block
         //      boolean a = 2 < 3 || if (2 < 3) { ... } else { ... }
@@ -274,13 +280,13 @@ public class CodegenVisitor implements Visitor {
         n.e1.accept(this);
 
         // push e1 onto stack
-        codeGen.pushQ("%rax");
+        codeGen.gen("pushq %rax");
 
         // generate code to eval e2, result in %rax
         n.e2.accept(this);
 
         // pop left argument into %rdx; clean up stack
-        codeGen.popQ("%rdx");
+        codeGen.gen("popq %rdx");
 
         // perform the addition; result in %rax
         codeGen.gen("addq %rdx, %rax");
@@ -289,9 +295,9 @@ public class CodegenVisitor implements Visitor {
     // Exp e1,e2;
     public void visit(Minus n) {
         n.e1.accept(this);
-        codeGen.pushQ("%rax");
+        codeGen.gen("pushq %rax");
         n.e2.accept(this);
-        codeGen.popQ("%rdx");
+        codeGen.gen("popq %rdx");
         codeGen.gen("negq %rax");
         codeGen.gen("addq %rdx, %rax");
     }
@@ -299,9 +305,11 @@ public class CodegenVisitor implements Visitor {
     // Exp e1,e2;
     public void visit(Times n) {
         n.e1.accept(this);
-        codeGen.pushQ("%rax");
+        codeGen.gen("pushq %rax");
+
         n.e2.accept(this);
-        codeGen.popQ("%rdx");
+        codeGen.gen("popq %rdx");
+
         codeGen.gen("imulq %rdx, %rax");
     }
 
@@ -360,9 +368,10 @@ public class CodegenVisitor implements Visitor {
 
         codeGen.gen("popq %rax");
         codeGen.gen("movq 0(%rax), %rax");
-        //TODO align()
+
+        codeGen.align();
         codeGen.gen("call *" + methodOffset + "(%rax)");
-        //TODO undo align()
+        codeGen.undoAlign();
 
         //codeGen.gen("movq " + objOffset + "(%rbp), %rdi");    // first argument is obj prt ("this")
         //codeGen.gen("movq 0(%rdi), %rax");                         // load vtable address into %rax
@@ -387,10 +396,10 @@ public class CodegenVisitor implements Visitor {
     public void visit(IdentifierExp n) {
         //TODO: currently just handles method variables, does not handle class instance variables.
         int offset;
-        if (symbolTable.getClassScope(currentClass).getMethodScope(currentmethod).methodVariables.containsKey(n.s)) {
-            offset = symbolTable.getClassScope(currentClass).getMethodScope(currentmethod).variableOffsets.get(n.s);
-        } else if (symbolTable.getClassScope(currentClass).getMethodScope(currentmethod).arguments.contains(new ArgumentType(n.s, "n/a"))) {
-            offset = symbolTable.getClassScope(currentClass).getMethodScope(currentmethod).getArgumentOffset(n.s);
+        if (symbolTable.getClassScope(currentClass).getMethodScope(currentMethod).methodVariables.containsKey(n.s)) {
+            offset = symbolTable.getClassScope(currentClass).getMethodScope(currentMethod).variableOffsets.get(n.s);
+        } else if (symbolTable.getClassScope(currentClass).getMethodScope(currentMethod).arguments.contains(new ArgumentType(n.s, "n/a"))) {
+            offset = symbolTable.getClassScope(currentClass).getMethodScope(currentMethod).getArgumentOffset(n.s);
         } else {
             // fields of obj
             System.out.println("This is a bug, shouldn't be here!");
@@ -412,7 +421,9 @@ public class CodegenVisitor implements Visitor {
 
     // Identifier i;
     public void visit(NewObject n) {
+        // TODO - align?
         codeGen.callocNewObject(8);
+        // TODO - undoAlign?
         codeGen.gen("leaq " + n.i.s + "$$, %rdx");  // get method table address
         codeGen.gen("movq %rdx, 0(%rax)");                // store vtbl ptr at beginning of object
 
