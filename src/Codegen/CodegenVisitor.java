@@ -324,6 +324,8 @@ public class CodegenVisitor implements Visitor {
         n.e.accept(this);
         //System.out.print(".");
         n.i.accept(this);
+        codeGen.gen("pushq %rax");
+
 
         //int objOffset = symbolTable.getClassOffset(((NewObject) n.e).i.s);
         // method offset depends on position in vtable, should just be calculated as 1,2,3,4...
@@ -344,21 +346,17 @@ public class CodegenVisitor implements Visitor {
             } // do not need to handle case where there is more than 5 parameters
             codeGen.gen("movq %rax, " + argumentRegister);
         }
-        //codeGen.gen("movq %rax, %rdi");
-        // if (symbolTable.getClassScope(currentClass).getMethodScope(currentmethod).newClasses.contains(new ...()))
-        //      -> offset = symbolTable.getClassScope(currentClass).getMethodScope(currentmethod).getClassOffset(...)
-        // else -> offset = -1; TODO
-        // NOTE: codeGen.gen("movq " + );
+
+        codeGen.gen("popq %rax");
         codeGen.gen("movq 0(%rax), %rax");
+        //TODO align()
         codeGen.gen("call *" + methodOffset + "(%rax)");
+        //TODO undo align()
 
         //codeGen.gen("movq " + objOffset + "(%rbp), %rdi");    // first argument is obj prt ("this")
         //codeGen.gen("movq 0(%rdi), %rax");                         // load vtable address into %rax
         //codeGen.gen("call *" + methodOffset + "(%rax)");      // call function whose address is at
                                                                  // the specified offset in the vtable
-        for ( int i = 0; i < n.el.size(); i++ ) {
-            n.el.get(i).accept(this);
-        }
     }
 
     // int i;
@@ -405,6 +403,11 @@ public class CodegenVisitor implements Visitor {
         codeGen.callocNewObject(8);
         codeGen.gen("leaq " + n.i.s + "$$, %rdx");  // get method table address
         codeGen.gen("movq %rdx, 0(%rax)");                // store vtbl ptr at beginning of object
+
+        codeGen.gen("pushq %rax");
+
+        //numNewClasses = currentclass.currentmethod.newClasses.size;
+
         //codeGen.gen("%rax, %rdi");                        // set up "this" for constructor
         //codeGen.gen("%rax, [offsetTemp](%rbp)");          // save "this" for later (or maybe pushq)
         // load constructor arguments
