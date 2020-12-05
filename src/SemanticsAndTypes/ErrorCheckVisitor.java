@@ -147,6 +147,47 @@ public class ErrorCheckVisitor implements Visitor {
             currentMethod = n.ml.get(i).i.s;
 
             if (symbolTable.getClassScope(n.j.s) != null) {
+                for (int j = 0; j < n.ml.get(i).fl.size(); j++) {
+                    String argumentName = n.ml.get(i).fl.get(j).i.s;
+                    if (fieldFoundInSuper(argumentName, currentClass)) {
+                        System.out.println("Error: (Line " + n.ml.get(i).fl.get(j).line_number + ") argument " + argumentName + " already inherited.");
+                        errorCounter++;
+                    }
+
+                    if (symbolTable.getClassScope(currentClass).instanceVariableCount.containsKey(argumentName)) {
+                        System.out.println("Error: (Line " + n.ml.get(i).fl.get(j).line_number + ") argument " + argumentName + " is already defined as field.");
+                        errorCounter++;
+                    }
+
+                    if (symbolTable.getClassScope(currentClass).getMethodScope(currentMethod).variableDeclarationCount.get(argumentName) != 1) {
+                        System.out.println("Error: (Line " + n.ml.get(i).fl.get(j).line_number + ") argument " + argumentName + " is already defined in method scope.");
+                        errorCounter++;
+                    }
+                }
+
+                for (int j = 0; j < n.ml.get(i).vl.size(); j++) {
+                    String variableName = n.ml.get(i).vl.get(j).i.s;
+
+                    if (fieldFoundInSuper(variableName, currentClass)) {
+                        System.out.println("Error: (Line " + n.ml.get(i).vl.get(j).line_number + ") argument " + variableName + " already inherited.");
+                        errorCounter++;
+                    }
+
+                    // check if variable in method is declared already as a field
+                    if (symbolTable.getClassScope(currentClass).instanceVariableCount.containsKey(variableName)) {
+                        System.out.println("Error: (Line " + n.ml.get(i).vl.get(j).line_number + ") variable " + variableName + " is already defined as field.");
+                        errorCounter++;
+                    }
+                    if (symbolTable.getClassScope(currentClass).getMethodScope(currentMethod).variableDeclarationCount.get(variableName) != 1) {
+                        System.out.println("Error: (Line " + n.ml.get(i).vl.get(j).line_number + ") variable " + variableName + " is already defined in method scope.");
+                        errorCounter++;
+                    }
+
+                }
+
+
+
+
                 if (symbolTable.getClassScope(n.j.s).methodMap.containsKey(currentMethod)) {
                     if (isDerived(symbolTable.getClassScope(n.j.s).getMethodScope(currentMethod).methodType, symbolTable.getClassScope(currentClass).getMethodScope(currentMethod).methodType)) {
                         for (int j = 0; j < n.ml.get(i).fl.size(); j++) {
