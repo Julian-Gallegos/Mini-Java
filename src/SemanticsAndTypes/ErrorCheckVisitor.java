@@ -76,7 +76,7 @@ public class ErrorCheckVisitor implements Visitor {
                     System.out.println("Error: (Line " + n.ml.get(i).fl.get(j).line_number + ") argument " + argumentName + " is already defined as field.");
                     errorCounter++;
                 }
-                if (symbolTable.getClassScope(currentClass).getMethodScope(currentMethod).variableDeclarationCount.containsKey(argumentName)) {
+                if (symbolTable.getClassScope(currentClass).getMethodScope(currentMethod).variableDeclarationCount.get(argumentName) != 1) {
                     System.out.println("Error: (Line " + n.ml.get(i).fl.get(j).line_number + ") argument " + argumentName + " is already defined in method scope.");
                     errorCounter++;
                 }
@@ -91,7 +91,7 @@ public class ErrorCheckVisitor implements Visitor {
                     System.out.println("Error: (Line " + n.ml.get(i).vl.get(j).line_number + ") variable " + methodVarName + " is already defined as field.");
                     errorCounter++;
                 }
-                if (symbolTable.getClassScope(currentClass).getMethodScope(currentMethod).variableDeclarationCount.containsKey(methodVarName)) {
+                if (symbolTable.getClassScope(currentClass).getMethodScope(currentMethod).variableDeclarationCount.get(methodVarName) != 1) {
                     System.out.println("Error: (Line " + n.ml.get(i).vl.get(j).line_number + ") variable " + methodVarName + " is already defined in method scope.");
                     errorCounter++;
                 }
