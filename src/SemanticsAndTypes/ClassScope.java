@@ -11,10 +11,13 @@ public class ClassScope {
 
     public List<String> orderedMethodList;
 
+    public Map<String, Integer> fieldOffsets;  // instance variables
+
     public ClassScope() {
         methodMap = new HashMap<>();
         variableMap = new HashMap<>();
         orderedMethodList = new ArrayList<>();
+        fieldOffsets = new HashMap<>();
     }
 
     public int getMethodOffset(String methodName) {

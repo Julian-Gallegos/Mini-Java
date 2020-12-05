@@ -27,6 +27,11 @@ public class CodegenVisitor implements Visitor {
         // TODO: put in helper method
         // Set offsets for local variables at each method context.
         for (ClassScope classScope : symbolTable.globalScope.values()) {
+            int j = 0;
+            for (String fieldName : classScope.variableMap.keySet()) {
+                classScope.fieldOffsets.put(fieldName, (8 * (j++)));
+            }
+
             for (MethodScope method : classScope.methodMap.values()) {
                 int i = 0;
                 for (String variable : method.methodVariables.keySet()) {
@@ -245,18 +250,26 @@ public class CodegenVisitor implements Visitor {
     public void visit(Assign n) {
         //TODO: currently just handles method variables, does not handle class instance variables.
         int offset;
+        boolean isInstanceVariable = false;
         if (symbolTable.getClassScope(currentClass).getMethodScope(currentMethod).methodVariables.containsKey(n.i.s)) {
             offset = symbolTable.getClassScope(currentClass).getMethodScope(currentMethod).variableOffsets.get(n.i.s);
         } else if (symbolTable.getClassScope(currentClass).getMethodScope(currentMethod).arguments.contains(new ArgumentType(n.i.s, "n/a"))) {
             offset = symbolTable.getClassScope(currentClass).getMethodScope(currentMethod).getArgumentOffset(n.i.s);
-        } else {
+        } else if (symbolTable.getClassScope(currentClass).fieldOffsets.containsKey(n.i.s)) {
             // fields of obj
-            System.out.println("This is a bug, shouldn't be here!");
+            isInstanceVariable = true;
+            offset = symbolTable.getClassScope(currentClass).fieldOffsets.get(n.i.s);
+        } else {
+            // should never reach this case
             offset = -1;
         }
         n.i.accept(this);
         n.e.accept(this);
-        codeGen.gen("movq %rax, -" + (offset + 8) + "(%rbp)");
+        if (!isInstanceVariable) {
+            codeGen.gen("movq %rax, -" + (offset + 8) + "(%rbp)");
+        } else {
+            codeGen.gen("movq %rax, -" + (offset + 8) + "(%rdi)");
+        }
     }
 
     // Identifier i;
@@ -423,16 +436,24 @@ public class CodegenVisitor implements Visitor {
     public void visit(IdentifierExp n) {
         //TODO: currently just handles method variables, does not handle class instance variables.
         int offset;
+        boolean isInstanceVariable = false;
         if (symbolTable.getClassScope(currentClass).getMethodScope(currentMethod).methodVariables.containsKey(n.s)) {
             offset = symbolTable.getClassScope(currentClass).getMethodScope(currentMethod).variableOffsets.get(n.s);
         } else if (symbolTable.getClassScope(currentClass).getMethodScope(currentMethod).arguments.contains(new ArgumentType(n.s, "n/a"))) {
             offset = symbolTable.getClassScope(currentClass).getMethodScope(currentMethod).getArgumentOffset(n.s);
-        } else {
+        } else if (symbolTable.getClassScope(currentClass).fieldOffsets.containsKey(n.s)) {
             // fields of obj
-            System.out.println("This is a bug, shouldn't be here!");
+            isInstanceVariable = true;
+            offset = symbolTable.getClassScope(currentClass).fieldOffsets.get(n.s);
+        } else {
+            // should never reach this case
             offset = -1;
         }
-        codeGen.gen("movq -" + (offset + 8) + "(%rbp), %rax");
+        if (!isInstanceVariable) {
+            codeGen.gen("movq -" + (offset + 8) + "(%rbp), %rax");
+        } else {
+            codeGen.gen("movq -" + (offset + 8) + "(%rdi), %rax");
+        }
     }
 
     public void visit(This n) {
@@ -449,19 +470,10 @@ public class CodegenVisitor implements Visitor {
     // Identifier i;
     public void visit(NewObject n) {
         // TODO - align?
-        codeGen.callocNewObject(8);
+        codeGen.callocNewObject(8 + (symbolTable.getClassScope(n.i.s).variableMap.size() * 8));
         // TODO - undoAlign?
         codeGen.gen("leaq " + n.i.s + "$$, %rdx");  // get method table address
         codeGen.gen("movq %rdx, 0(%rax)");                // store vtbl ptr at beginning of object
-
-        //numNewClasses = currentclass.currentmethod.newClasses.size;
-
-        //codeGen.gen("%rax, %rdi");                        // set up "this" for constructor
-        //codeGen.gen("%rax, [offsetTemp](%rbp)");          // save "this" for later (or maybe pushq)
-        // load constructor arguments
-        //codeGen.gen(n.i.s + "$" + n.i.s);                 // call ctor if we have one (no vtbl lookup)
-        //codeGen.gen("[offsetTemp](%rbp), %rax");          // recover ptr to object
-        //codeGen.gen("%rax, [offsetOne](%rbp)");            // store object reference in variable one
     }
 
     // Exp e;
