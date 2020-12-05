@@ -288,7 +288,7 @@ public class CodegenVisitor implements Visitor {
 
         n.e2.accept(this);
         codeGen.gen("popq %rdx");
-        codeGen.gen("cmpq %rdx, %rax");
+        codeGen.gen("cmpq %rax, %rdx");
         codeGen.gen("setl %al");
         codeGen.gen("movzbq %al, %rax");
         //codeGen.gen("jge .Else" + codeGen.elseCounter);
@@ -467,7 +467,7 @@ public class CodegenVisitor implements Visitor {
     // Exp e;
     public void visit(Not n) {
         n.e.accept(this);
-        codeGen.gen("tesq %rax, %rax");
+        codeGen.gen("testq %rax, %rax");
         codeGen.gen("sete %al");
         codeGen.gen("movzbq %al, %rax");
     }
