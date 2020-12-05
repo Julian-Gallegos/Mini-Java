@@ -2,6 +2,10 @@ package SemanticsAndTypes;
 
 import AST.*;
 import AST.Visitor.Visitor;
+
+import javax.lang.model.type.ArrayType;
+import java.beans.Expression;
+import java.lang.reflect.Array;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -131,7 +135,47 @@ public class ErrorCheckVisitor implements Visitor {
         for ( int i = 0; i < n.sl.size(); i++ ) {
             n.sl.get(i).accept(this);
         }
+
+        checkTypesMatch(n.e, n.t);
         n.e.accept(this);
+    }
+
+    public void checkTypesMatch(Exp e, Type t) {
+        if (isArithmeticExpression(e)) {
+            if (!(t instanceof IntegerType)) {
+                System.out.println("Error: (line " + e.line_number + ") return types don't match.");
+                errorCounter++;
+            }
+        } else if (isBooleanExpression(e)) {
+            if (!(t instanceof BooleanType)) {
+                System.out.println("Error: (line " + e.line_number + ") return types don't match.");
+                errorCounter++;
+            }
+        } else if (e instanceof Call) {
+            if (isCall(((Call) e).e, ((Call) e).i, ((Call) e).el, "intArray")) {
+                if (!(t instanceof IntArrayType)) {
+                    System.out.println("Error: (line " + e.line_number + ") return types don't match.");
+                    errorCounter++;
+                }
+            }
+            if (t instanceof IdentifierType) {
+                if (!isCall(((Call) e).e, ((Call) e).i, ((Call) e).el, ((IdentifierType)t).s)) {
+                    System.out.println("Error: (line " + e.line_number + ") return types don't match.");
+                    errorCounter++;
+                }
+            } else {
+                // some sort of error
+            }
+        } else if (e instanceof IdentifierExp) {
+            if (t instanceof IdentifierType) {
+                if (!((IdentifierType) t).s.equals(((IdentifierExp) e).s)) {
+                    System.out.println("Error: (line " + e.line_number + ") return types don't match.");
+                    errorCounter++;
+                }
+            } else {
+                // some sort of error
+            }
+        }
     }
 
     // Type t;
@@ -531,7 +575,7 @@ public class ErrorCheckVisitor implements Visitor {
     // Exp e;
     public void visit(Print n) {
         if (!isArithmeticExpression(n.e)) {
-            System.out.println("Error (line " + n.e.line_number + ") print applied to non-int expression.");
+            System.out.println("Error: (line " + n.e.line_number + ") print applied to non-int expression.");
             errorCounter++;
         }
 
@@ -544,7 +588,7 @@ public class ErrorCheckVisitor implements Visitor {
         n.i.accept(this);
         if (!areEqualTypes(n.e, lookupTypeForID(n.i.s))) {
             errorCounter++;
-            System.out.println("Error (line " + n.i.line_number + ") types do not match");
+            System.out.println("Error: (line " + n.i.line_number + ") types do not match.");
         }
         n.e.accept(this);
     }
@@ -803,7 +847,7 @@ public class ErrorCheckVisitor implements Visitor {
     public void visit(NewArray n) {
         if (!isArithmeticExpression(n.e)) {
             errorCounter++;
-          System.out.println("Error (line " + n.e.line_number + ") expression not of type integer");
+          System.out.println("Error: (line " + n.e.line_number + ") expression not of type integer.");
         }
         n.e.accept(this);
     }
@@ -812,7 +856,7 @@ public class ErrorCheckVisitor implements Visitor {
     public void visit(NewObject n) {
         if (symbolTable.getClassScope(n.i.s) == null) {
             errorCounter++;
-            System.out.println("Error (line " + n.i.line_number + ") class not found");
+            System.out.println("Error: (line " + n.i.line_number + ") class not found.");
         }
     }
 
