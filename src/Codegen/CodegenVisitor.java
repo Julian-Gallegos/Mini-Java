@@ -406,12 +406,12 @@ public class CodegenVisitor implements Visitor {
             codeGen.gen("movq %rax, " + argumentRegister);
         }
 
-        codeGen.gen("popq %rdi");
         codeGen.gen("movq 0(%rdi), %rax");
 
         codeGen.align();
         codeGen.gen("call *" + methodOffset + "(%rax)");
         codeGen.undoAlign();
+        codeGen.gen("popq %rdi");
 
         //codeGen.gen("movq " + objOffset + "(%rbp), %rdi");    // first argument is obj prt ("this")
         //codeGen.gen("movq 0(%rdi), %rax");                         // load vtable address into %rax
