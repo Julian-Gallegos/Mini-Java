@@ -20,6 +20,15 @@ public class MethodScope {
         arguments = new ArrayList<ArgumentType>();
     }
 
+    // please send in a name that's an argument of this method.
+    public String getTypeForName(String name) {
+        for (ArgumentType at : arguments) {
+            if (at.name.equals(name)) {
+                return at.type;
+            }
+        }
+        return null;
+    }
 
     // assumes the name 'argName' is contained in the arguments list
     public int getArgumentOffset(String argName) {
