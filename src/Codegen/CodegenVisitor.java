@@ -385,6 +385,20 @@ public class CodegenVisitor implements Visitor {
         } else if (n.e instanceof This) {
             methodOffset = symbolTable.getClassScope(currentClass).getMethodOffset(n.i.s);
         } else if (n.e instanceof IdentifierExp) {
+	    // field of currentClass or variable of method
+	    String cn = null;
+	    // need to handle extended case soon.
+	    if (symbolTable.getClassScope(currentClass).variableMap.containsKey(((IdentifierExp)n.e).s)) {
+		cn = symbolTable.getClassScope(currentClass).variableMap.get(((IdentifierExp)n.e).s);
+	    } else if (symbolTable.getClassScope(currentClass).getMethodScope(currentMethod).methodVariables.containsKey(((IdentifierExp)n.e).s)) {
+		cn = symbolTable.getClassScope(currentClass).getMethodScope(currentMethod).methodVariables.get(((IdentifierExp)n.e).s);
+	    } else if (symbolTable.getClassScope(currentClass).getMethodScope(currentMethod).arguments.contains(new ArgumentType(((IdentifierExp)n.e).s, "n/a"))) {
+		// parameter of currentMethod in currentClass
+		cn = symbolTable.getClassScope(currentClass).getMethodScope(currentMethod).getTypeForName(((IdentifierExp)n.e).s);
+	    } else {
+		// should never reach this. 
+	    }
+	   
             methodOffset = symbolTable.getClassScope(((IdentifierExp)n.e).s).getMethodOffset(n.i.s);
         }
 

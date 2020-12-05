@@ -5,11 +5,11 @@ class Test{
 }
 
 class Person {
-    int u;
-    
+ 
     public int testA(int w) {
-	u = 100;
-	return u + w; 
+	BankAccount u;
+	u = new BankAccount();
+	return u.increment(w); 
     }
  
     public int controlFlowTest() {
@@ -35,5 +35,14 @@ class Person {
     public int testB() {
         System.out.println(2020);
 	return 1;
+    }
+}
+
+class BankAccount {
+    int balance;
+
+    public int increment(int i) {
+	balance = i;
+	return balance + 500; 
     }
 }
