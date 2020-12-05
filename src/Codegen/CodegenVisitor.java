@@ -197,7 +197,7 @@ public class CodegenVisitor implements Visitor {
     // Exp e;
     // Statement s1,s2;
     public void visit(If n) {
-        codeGen.printComment("Entering if statement.");
+        codeGen.genComment("Entering if statement.");
         n.e.accept(this);
         n.s1.accept(this);
         n.s2.accept(this);
