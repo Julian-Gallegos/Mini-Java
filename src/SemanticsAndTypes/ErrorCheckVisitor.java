@@ -77,7 +77,7 @@ public class ErrorCheckVisitor implements Visitor {
                     errorCounter++;
                 }
                 if (symbolTable.getClassScope(currentClass).getMethodScope(currentMethod).variableDeclarationCount.containsKey(argumentName)) {
-                    System.out.print("Error: (Line " + n.ml.get(i).fl.get(j).line_number + ") argument " + argumentName + " is already defined in method scope.");
+                    System.out.println("Error: (Line " + n.ml.get(i).fl.get(j).line_number + ") argument " + argumentName + " is already defined in method scope.");
                     errorCounter++;
                 }
             }
@@ -92,7 +92,7 @@ public class ErrorCheckVisitor implements Visitor {
                     errorCounter++;
                 }
                 if (symbolTable.getClassScope(currentClass).getMethodScope(currentMethod).variableDeclarationCount.containsKey(methodVarName)) {
-                    System.out.print("Error: (Line " + n.ml.get(i).vl.get(j).line_number + ") variable " + methodVarName + " is already defined in method scope.");
+                    System.out.println("Error: (Line " + n.ml.get(i).vl.get(j).line_number + ") variable " + methodVarName + " is already defined in method scope.");
                     errorCounter++;
                 }
             }
