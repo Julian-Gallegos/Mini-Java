@@ -100,6 +100,18 @@ public class ErrorCheckVisitor implements Visitor {
         }
     }
 
+    // returns true if fieldname is found in a super class of any depth, false otherwise.
+    private boolean fieldFoundInSuper(String fieldName, String cn) {
+        String extendedClass = typeTable.getType(cn);
+        if (symbolTable.getClassScope(extendedClass).instanceVariableCount.containsKey(fieldName)) {
+            return true;
+        }
+        if (extendedClass != null) {
+            return fieldFoundInSuper(fieldName, extendedClass);
+        }
+        return false;
+    }
+
     // Identifier i;
     // Identifier j;
     // VarDeclList vl;
@@ -114,6 +126,17 @@ public class ErrorCheckVisitor implements Visitor {
         n.j.accept(this); // extend class name
 
         for ( int i = 0; i < n.vl.size(); i++ ) {
+            String fieldName = n.vl.get(i).i.s;
+            // check for fieldname in superclass of any depth
+            if (fieldFoundInSuper(fieldName, currentClass)) {
+                System.out.println("Error: (Line " + n.vl.get(i).line_number + ") field " + fieldName + " already inherited.");
+                errorCounter++;
+            }
+            // check if its already defined in class scope
+            if (symbolTable.getClassScope(currentClass).instanceVariableCount.get(fieldName) != 1) {
+                System.out.println("Error: (Line " + n.vl.get(i).line_number + ") variable " + fieldName + " is already defined.");
+                errorCounter++;
+            }
             n.vl.get(i).accept(this);
         }
         if (symbolTable.getClassScope(n.j.s) == null) {
