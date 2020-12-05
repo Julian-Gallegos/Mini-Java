@@ -337,7 +337,8 @@ public class ErrorCheckVisitor implements Visitor {
             }
             if (ms.arguments.size() != expList.size()) {
                 errorCounter++;
-                System.out.println("Error (line " + id.line_number + ") method argument count mismatch");
+                System.out.println("Error (line " + id.line_number + ") method " + methodName + " expected " + ms.arguments.size() + " arguments. "
+                        + expList.size() + " arguments given");
                 return false;
             }
             for (int i = 0; i < ms.arguments.size(); i++) {
@@ -410,6 +411,14 @@ public class ErrorCheckVisitor implements Visitor {
     private String getMethodType(String className, Identifier id, ExpList expList) {
         String methodName = id.s;
         MethodScope ms = symbolTable.getClassScope(className).getMethodScope(methodName);
+
+        if (ms.arguments.size() != expList.size()) {
+            errorCounter++;
+            System.out.println("Error (line " + id.line_number + ") method " + methodName + " expected " + ms.arguments.size() + " arguments. "
+            + expList.size() + " arguments given");
+            return null;
+        }
+
         for (int i = 0; i < ms.arguments.size(); i++) {
             ArgumentType at = ms.arguments.get(i);
             Exp exp = expList.get(i);
