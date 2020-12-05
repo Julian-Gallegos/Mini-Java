@@ -659,6 +659,10 @@ public class ErrorCheckVisitor implements Visitor {
         if (cs.variableMap.containsKey(id) && isDerived(type, cs.variableMap.get(id))) {
             return true;
         }
+        //TODO
+        if (fieldFoundInSuper(id, className)) {
+            return true;
+        }
         //System.out.println("Class: "+className+" Method: "+methodName+" id: "+id+" compare with type: "+type);
         System.out.println("Error: (Line " + e.line_number + ") variable " + id + " is not defined.");
         errorCounter++;
