@@ -84,24 +84,31 @@ public class ErrorCheckVisitor implements Visitor {
         for ( int i = 0; i < n.vl.size(); i++ ) {
             n.vl.get(i).accept(this);
         }
+        if (symbolTable.getClassScope(n.j.s) == null) {
+            System.out.println("Error: (Line " + n.line_number + ") superclass " + n.j.s + " does not exist.");
+            errorCounter++;
+        }
         for ( int i = 0; i < n.ml.size(); i++ ) {
-            currentMethod = n.ml.get(i).i.s;  // TAG
-            if (symbolTable.getClassScope(n.j.s).methodMap.containsKey(currentMethod)) {
-                if (isDerived(symbolTable.getClassScope(n.j.s).getMethodScope(currentMethod).methodType, symbolTable.getClassScope(currentClass).getMethodScope(currentMethod).methodType)) {
-                    for (int j = 0; j < n.ml.get(i).fl.size(); j++) {
-                        Type t = n.ml.get(i).fl.get(i).t;
-                        String superType = symbolTable.getClassScope(n.j.s).getMethodScope(currentMethod).arguments.get(j).type;
-                        if (!((     t instanceof BooleanType && superType.equals("boolean"))
-                                || (t instanceof IntegerType && superType.equals("integer"))
-                                || (t instanceof IntArrayType && superType.equals("intArray"))
-                                || (t instanceof IdentifierType && superType.equals(((IdentifierType)t).s)))) {
-                            errorCounter++;
-                            System.out.println("Error (line " + n.ml.get(i).line_number + ") override method argument types do not match");
+            currentMethod = n.ml.get(i).i.s;
+
+            if (symbolTable.getClassScope(n.j.s) != null) {
+                if (symbolTable.getClassScope(n.j.s).methodMap.containsKey(currentMethod)) {
+                    if (isDerived(symbolTable.getClassScope(n.j.s).getMethodScope(currentMethod).methodType, symbolTable.getClassScope(currentClass).getMethodScope(currentMethod).methodType)) {
+                        for (int j = 0; j < n.ml.get(i).fl.size(); j++) {
+                            Type t = n.ml.get(i).fl.get(i).t;
+                            String superType = symbolTable.getClassScope(n.j.s).getMethodScope(currentMethod).arguments.get(j).type;
+                            if (!((t instanceof BooleanType && superType.equals("boolean"))
+                                    || (t instanceof IntegerType && superType.equals("integer"))
+                                    || (t instanceof IntArrayType && superType.equals("intArray"))
+                                    || (t instanceof IdentifierType && superType.equals(((IdentifierType) t).s)))) {
+                                errorCounter++;
+                                System.out.println("Error (line " + n.ml.get(i).line_number + ") override method argument types do not match");
+                            }
                         }
+                    } else {
+                        errorCounter++;
+                        System.out.println("Error (line " + n.ml.get(i).line_number + ") override method return type does not match");
                     }
-                } else {
-                    errorCounter++;
-                    System.out.println("Error (line " + n.ml.get(i).line_number + ") override method return type does not match");
                 }
             }
             n.ml.get(i).accept(this);
