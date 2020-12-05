@@ -132,6 +132,46 @@ public class CodeGenerator {
     }
 
 
+    // takes an identifier id.
+    // recursively explores the super classes and looks for a match.
+    // we know that id is somewhere in the super class hierarchy
+    // it has to be a field for one of the super classes.
+    /*
+    public int getOffsetForIdentifierField (SymbolTable st, String id, String cn) {
+        // checking to see if id is a field of this class
+        if (st.getClassScope(cn).variableMap.containsKey(id)) {
+            //return st.getClassScope(cn).
+            return -1;
+        }
+        // call on the super class
+        return -1;
+    }
+
+    class A {
+        a = 100;
+    }
+    class B extends A {
+        ..
+        .. method () {
+            a = 100;
+        }
+    }
+
+    private boolean isExtendedFrom(String className, String methodName) {
+        if (!symbolTable.getClassScope(className).methodMap.containsKey(methodName)) {
+            // check for extended class
+            String extendedClass = typeTable.getType(className);
+            if (extendedClass != null) {
+                return isExtendedFrom(extendedClass, methodName);
+            } else {
+                // no extended class
+                return false;
+            }
+        }
+        return true;
+    }
+    */
+
 
     // ================ METHODS WE MAY NOT NEED ================
 

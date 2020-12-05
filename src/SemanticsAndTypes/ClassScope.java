@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 public class ClassScope {
+    public Map<String, Integer> instanceVariableCount;
     public Map<String, MethodScope> methodMap;
     public Map<String, String> variableMap;
 
@@ -14,6 +15,7 @@ public class ClassScope {
     public Map<String, Integer> fieldOffsets;  // instance variables
 
     public ClassScope() {
+        instanceVariableCount = new HashMap<>();
         methodMap = new HashMap<>();
         variableMap = new HashMap<>();
         orderedMethodList = new ArrayList<>();

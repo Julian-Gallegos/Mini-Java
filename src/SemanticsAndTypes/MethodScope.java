@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 public class MethodScope {
+    // this should count field declarations of all superclasses.
+    public Map<String, Integer> variableDeclarationCount;
 
     public Map<String, String> methodVariables;
     public Map<String, Integer> variableOffsets;
@@ -14,6 +16,7 @@ public class MethodScope {
     public List<ArgumentType> arguments;
 
     public MethodScope(String methodType) {
+        variableDeclarationCount = new HashMap<>(); 
         this.methodType = methodType;
         methodVariables = new HashMap<>();
         variableOffsets = new HashMap<>();

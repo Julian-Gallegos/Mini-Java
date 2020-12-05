@@ -49,6 +49,13 @@ public class GeneratorVisitor implements Visitor {
             String variable = n.vl.get(i).i.s;
             String t = getType(n.vl.get(i).t);
             symbolTable.getClassScope(n.i.s).putVariable(variable, t);
+
+            if (!symbolTable.getClassScope(n.i.s).instanceVariableCount.containsKey(variable)) {
+                symbolTable.getClassScope(n.i.s).instanceVariableCount.put(variable, 0);
+            }
+            symbolTable.getClassScope(n.i.s).instanceVariableCount.put(variable,
+                    (symbolTable.getClassScope(n.i.s).instanceVariableCount.get(variable) + 1));
+
             n.vl.get(i).accept(this);
         }
         for ( int i = 0; i < n.ml.size(); i++ ) {
@@ -60,11 +67,23 @@ public class GeneratorVisitor implements Visitor {
                 Formal f = n.ml.get(i).fl.get(j);
                 String argumentType = getType(n.ml.get(i).fl.get(j).t);
                 symbolTable.getClassScope(n.i.s).getMethodScope(method).insertArgument(new ArgumentType(f.i.s, argumentType));
+
+                if (!symbolTable.getClassScope(n.i.s).getMethodScope(method).variableDeclarationCount.containsKey(f.i.s)) {
+                    symbolTable.getClassScope(n.i.s).getMethodScope(method).variableDeclarationCount.put(f.i.s, 0);
+                }
+                symbolTable.getClassScope(n.i.s).getMethodScope(method).variableDeclarationCount.put(f.i.s,
+                        symbolTable.getClassScope(n.i.s).getMethodScope(method).variableDeclarationCount.get(f.i.s) + 1);
             }
             for (int j = 0; j < n.ml.get(i).vl.size(); j++) {
                 VarDecl vd = n.ml.get(i).vl.get(j);
                 String variableType = getType(n.ml.get(i).vl.get(j).t);
                 symbolTable.getClassScope(n.i.s).getMethodScope(method).putVariable(vd.i.s, variableType);
+
+                if (!symbolTable.getClassScope(n.i.s).getMethodScope(method).variableDeclarationCount.containsKey(vd.i.s)) {
+                    symbolTable.getClassScope(n.i.s).getMethodScope(method).variableDeclarationCount.put(vd.i.s, 0);
+                }
+                symbolTable.getClassScope(n.i.s).getMethodScope(method).variableDeclarationCount.put(vd.i.s,
+                        symbolTable.getClassScope(n.i.s).getMethodScope(method).variableDeclarationCount.get(vd.i.s) + 1);
             }
 
             n.ml.get(i).accept(this);
@@ -97,6 +116,13 @@ public class GeneratorVisitor implements Visitor {
             String variable = n.vl.get(i).i.s;
             String t = getType(n.vl.get(i).t);
             symbolTable.getClassScope(n.i.s).putVariable(variable, t);
+
+            if (!symbolTable.getClassScope(n.i.s).instanceVariableCount.containsKey(variable)) {
+                symbolTable.getClassScope(n.i.s).instanceVariableCount.put(variable, 0);
+            }
+            symbolTable.getClassScope(n.i.s).instanceVariableCount.put(variable,
+                    (symbolTable.getClassScope(n.i.s).instanceVariableCount.get(variable) + 1));
+
             n.vl.get(i).accept(this);
         }
         for ( int i = 0; i < n.ml.size(); i++ ) {
@@ -107,11 +133,23 @@ public class GeneratorVisitor implements Visitor {
                 Formal f = n.ml.get(i).fl.get(j);
                 String argumentType = getType(n.ml.get(i).fl.get(j).t);
                 symbolTable.getClassScope(n.i.s).getMethodScope(method).insertArgument(new ArgumentType(f.i.s, argumentType));
+
+                if (!symbolTable.getClassScope(n.i.s).getMethodScope(method).variableDeclarationCount.containsKey(f.i.s)) {
+                    symbolTable.getClassScope(n.i.s).getMethodScope(method).variableDeclarationCount.put(f.i.s, 0);
+                }
+                symbolTable.getClassScope(n.i.s).getMethodScope(method).variableDeclarationCount.put(f.i.s,
+                        symbolTable.getClassScope(n.i.s).getMethodScope(method).variableDeclarationCount.get(f.i.s) + 1);
             }
             for (int j = 0; j < n.ml.get(i).vl.size(); j++) {
                 VarDecl vd = n.ml.get(i).vl.get(j);
                 String variableType = getType(n.ml.get(i).vl.get(j).t);
                 symbolTable.getClassScope(n.i.s).getMethodScope(method).putVariable(vd.i.s, variableType);
+
+                if (!symbolTable.getClassScope(n.i.s).getMethodScope(method).variableDeclarationCount.containsKey(vd.i.s)) {
+                    symbolTable.getClassScope(n.i.s).getMethodScope(method).variableDeclarationCount.put(vd.i.s, 0);
+                }
+                symbolTable.getClassScope(n.i.s).getMethodScope(method).variableDeclarationCount.put(vd.i.s,
+                        symbolTable.getClassScope(n.i.s).getMethodScope(method).variableDeclarationCount.get(vd.i.s) + 1);
             }
 
             n.ml.get(i).accept(this);

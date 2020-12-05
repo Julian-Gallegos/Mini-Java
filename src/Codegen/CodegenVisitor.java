@@ -91,9 +91,7 @@ public class CodegenVisitor implements Visitor {
     // MethodDeclList ml;
     public void visit(ClassDeclSimple n) {
         currentClass = n.i.s;
-        //System.out.print("class ");
         n.i.accept(this);
-        //System.out.println(" { ");
         for ( int i = 0; i < n.vl.size(); i++ ) {
             n.vl.get(i).accept(this);
         }
@@ -260,7 +258,7 @@ public class CodegenVisitor implements Visitor {
             isInstanceVariable = true;
             offset = symbolTable.getClassScope(currentClass).fieldOffsets.get(n.i.s);
         } else {
-            // should never reach this case
+            // check superclasses and look for n.i.s
             offset = -1;
         }
         n.i.accept(this);
@@ -271,6 +269,8 @@ public class CodegenVisitor implements Visitor {
             codeGen.gen("movq %rax, -" + (offset + 8) + "(%rdi)");
         }
     }
+
+
 
     // Identifier i;
     // Exp e1,e2;
@@ -389,14 +389,14 @@ public class CodegenVisitor implements Visitor {
 	    String cn = null;
 	    // need to handle extended case soon.
 	    if (symbolTable.getClassScope(currentClass).variableMap.containsKey(((IdentifierExp)n.e).s)) {
-		cn = symbolTable.getClassScope(currentClass).variableMap.get(((IdentifierExp)n.e).s);
+		    cn = symbolTable.getClassScope(currentClass).variableMap.get(((IdentifierExp)n.e).s);
 	    } else if (symbolTable.getClassScope(currentClass).getMethodScope(currentMethod).methodVariables.containsKey(((IdentifierExp)n.e).s)) {
-		cn = symbolTable.getClassScope(currentClass).getMethodScope(currentMethod).methodVariables.get(((IdentifierExp)n.e).s);
+		    cn = symbolTable.getClassScope(currentClass).getMethodScope(currentMethod).methodVariables.get(((IdentifierExp)n.e).s);
 	    } else if (symbolTable.getClassScope(currentClass).getMethodScope(currentMethod).arguments.contains(new ArgumentType(((IdentifierExp)n.e).s, "n/a"))) {
-		// parameter of currentMethod in currentClass
-		cn = symbolTable.getClassScope(currentClass).getMethodScope(currentMethod).getTypeForName(((IdentifierExp)n.e).s);
+		    // parameter of currentMethod in currentClass
+		    cn = symbolTable.getClassScope(currentClass).getMethodScope(currentMethod).getTypeForName(((IdentifierExp)n.e).s);
 	    } else {
-		// should never reach this. 
+		    // should never reach this.
 	    }
 	   
             methodOffset = symbolTable.getClassScope(cn).getMethodOffset(n.i.s);
