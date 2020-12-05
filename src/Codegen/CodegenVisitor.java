@@ -142,16 +142,14 @@ public class CodegenVisitor implements Visitor {
         }
         for (int i = 0; i < n.fl.size(); i++) {
             if (i == 0) {
-                codeGen.gen("pushq %rdi");
-            } else if (i == 1) {
                 codeGen.gen("pushq %rsi");
-            } else if (i == 2) {
+            } else if (i == 1) {
                 codeGen.gen("pushq %rdx");
-            } else if (i == 3) {
+            } else if (i == 2) {
                 codeGen.gen("pushq %rcx");
-            } else if (i == 4) {
+            } else if (i == 3) {
                 codeGen.gen("pushq %r8");
-            } else if (i == 5) {
+            } else if (i == 4) {
                 codeGen.gen("pushq %r9");
             }
         }
