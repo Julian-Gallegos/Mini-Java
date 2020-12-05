@@ -121,6 +121,7 @@ public class ErrorCheckVisitor implements Visitor {
         currentMethod = n.i.s;  // TAG
         n.i.accept(this);   // method name
         n.t.accept(this);   // return type
+
         for ( int i = 0; i < n.fl.size(); i++ ) {
             n.fl.get(i).accept(this);
         }
@@ -529,17 +530,10 @@ public class ErrorCheckVisitor implements Visitor {
 
     // Exp e;
     public void visit(Print n) {
-        // TAG - bug fixes
-        if (n.e instanceof IdentifierExp) {
-            // want to check if the identifier expression is an int
-            if (!isArithmeticExpression(n.e)) {
-                System.out.println("Error (line " + n.e.line_number + ") print applied to non-int expression.");
-            }
+        if (!isArithmeticExpression(n.e)) {
+            System.out.println("Error (line " + n.e.line_number + ") print applied to non-int expression.");
+            errorCounter++;
         }
-        if (n.e instanceof Call) {
-            // check that the method call is an int
-        }
-
 
         n.e.accept(this);
     }
@@ -780,10 +774,7 @@ public class ErrorCheckVisitor implements Visitor {
     // Identifier i;
     // ExpList el;
     public void visit(Call n) {
-        if (isCallHelper(n.e, n.i, n.el) == null) {
-            errorCounter++;
-            System.out.println("Error: (line " + n.e.line_number + ") invalid call");
-        }
+        isCallHelper(n.e, n.i, n.el);
         n.e.accept(this);
         n.i.accept(this);
         for ( int i = 0; i < n.el.size(); i++ ) {
