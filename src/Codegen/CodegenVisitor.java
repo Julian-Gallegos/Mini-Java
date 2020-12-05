@@ -399,7 +399,7 @@ public class CodegenVisitor implements Visitor {
 		// should never reach this. 
 	    }
 	   
-            methodOffset = symbolTable.getClassScope(((IdentifierExp)n.e).s).getMethodOffset(n.i.s);
+            methodOffset = symbolTable.getClassScope(cn).getMethodOffset(n.i.s);
         }
 
         // movq
