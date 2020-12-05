@@ -695,7 +695,7 @@ public class ErrorCheckVisitor implements Visitor {
     // Exp e;
     public void visit(Print n) {
         if (!isArithmeticExpression(n.e)) {
-            System.out.println("Error: (line " + n.e.line_number + ") print applied to non-int expression.");
+            System.out.println("Error: (line " + n.e.line_number + ") print applied to non-int expression or print expression invalid.");
             errorCounter++;
         }
 
