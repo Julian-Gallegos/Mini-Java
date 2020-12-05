@@ -334,7 +334,8 @@ public class CodegenVisitor implements Visitor {
         n.e.accept(this);
         //System.out.print(".");
         n.i.accept(this);
-        codeGen.gen("pushq %rax");
+        codeGen.gen("movq %rax, %rdi");
+        codeGen.gen("pushq %rdi");
 
 
         //int objOffset = symbolTable.getClassOffset(((NewObject) n.e).i.s);
@@ -366,8 +367,8 @@ public class CodegenVisitor implements Visitor {
             codeGen.gen("movq %rax, " + argumentRegister);
         }
 
-        codeGen.gen("popq %rax");
-        codeGen.gen("movq 0(%rax), %rax");
+        codeGen.gen("popq %rdi");
+        codeGen.gen("movq 0(%rdi), %rax");
 
         codeGen.align();
         codeGen.gen("call *" + methodOffset + "(%rax)");
