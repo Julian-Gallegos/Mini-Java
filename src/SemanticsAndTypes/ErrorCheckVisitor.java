@@ -168,7 +168,11 @@ public class ErrorCheckVisitor implements Visitor {
             }
         } else if (e instanceof IdentifierExp) {
             if (t instanceof IdentifierType) {
-                if (!((IdentifierType) t).s.equals(((IdentifierExp) e).s)) {
+                String lookup = lookupTypeForID(((IdentifierExp) e).s);
+                if (lookup == null) {
+                    System.out.println("Error: (Line " + e.line_number + ") " + (((IdentifierExp) e).s) + " is an undeclared variable.");
+                    errorCounter++;
+                } else if (!((IdentifierType) t).s.equals(lookup)) {
                     System.out.println("Error: (line " + e.line_number + ") return types don't match.");
                     errorCounter++;
                 }
@@ -545,7 +549,9 @@ public class ErrorCheckVisitor implements Visitor {
         if (cs.variableMap.containsKey(id) && isDerived(type, cs.variableMap.get(id))) {
             return true;
         }
-        System.out.println("Class: "+className+" Method: "+methodName+" id: "+id+" compare with type: "+type);
+        //System.out.println("Class: "+className+" Method: "+methodName+" id: "+id+" compare with type: "+type);
+        System.out.println("Error: (Line " + e.line_number + ") variable " + id + " is not defined.");
+        errorCounter++;
         return false;
     }
 
@@ -554,7 +560,7 @@ public class ErrorCheckVisitor implements Visitor {
     public void visit(If n) {
         if (!isBooleanExpression(n.e)) {
             errorCounter++;
-            System.out.println("Error (line " + n.e.line_number + ") condition is not of type boolean");
+            System.out.println("Error: (line " + n.e.line_number + ") condition is not of type boolean");
         }
         n.e.accept(this);
         n.s1.accept(this); // if true
@@ -566,7 +572,7 @@ public class ErrorCheckVisitor implements Visitor {
     public void visit(While n) {
         if (!isBooleanExpression(n.e)) {
             errorCounter++;
-            System.out.println("Error (line " + n.e.line_number + ") conditional not boolean");
+            System.out.println("Error: (line " + n.e.line_number + ") conditional not boolean");
         }
         n.e.accept(this);
         n.s.accept(this);
@@ -586,10 +592,18 @@ public class ErrorCheckVisitor implements Visitor {
     // Exp e;
     public void visit(Assign n) {
         n.i.accept(this);
-        if (!areEqualTypes(n.e, lookupTypeForID(n.i.s))) {
+
+        String lookup = lookupTypeForID(n.i.s);
+        if (lookup == null) {
+            System.out.println("Error: (line " + n.i.line_number + ") " + n.i.s + " is undeclared.");
             errorCounter++;
-            System.out.println("Error: (line " + n.i.line_number + ") types do not match.");
+        } else {
+            if (!areEqualTypes(n.e, lookup)) {
+                errorCounter++;
+                System.out.println("Error: (line " + n.i.line_number + ") types do not match.");
+            }
         }
+
         n.e.accept(this);
     }
 
