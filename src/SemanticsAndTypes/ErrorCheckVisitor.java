@@ -134,8 +134,10 @@ public class ErrorCheckVisitor implements Visitor {
         n.t.accept(this);   // return type
 
         for ( int i = 0; i < n.fl.size(); i++ ) {
-            if (lookupTypeForID(n.fl.get(i).i.s) == null) {
-                System.out.println("Error: (Line " + n.fl.line_number + ") argument type for " + n.fl.get(i).i.s + " is not defined.");
+	    
+	    String idLookup = lookupTypeForID(n.fl.get(i).i.s);
+	    if (idLookup != null && !symbolTable.globalScope.containsKey(idLookup)) {
+                System.out.println("Error: (Line " + n.fl.line_number + ") argument type " + idLookup + " is not defined.");
                 errorCounter++;
             }
             n.fl.get(i).accept(this);
