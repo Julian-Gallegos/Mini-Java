@@ -103,10 +103,10 @@ public class ErrorCheckVisitor implements Visitor {
     // returns true if fieldname is found in a super class of any depth, false otherwise.
     private boolean fieldFoundInSuper(String fieldName, String cn) {
         String extendedClass = typeTable.getType(cn);
-        if (symbolTable.getClassScope(extendedClass).instanceVariableCount.containsKey(fieldName)) {
-            return true;
-        }
         if (extendedClass != null) {
+            if (symbolTable.getClassScope(extendedClass).instanceVariableCount.containsKey(fieldName)) {
+                return true;
+            }
             return fieldFoundInSuper(fieldName, extendedClass);
         }
         return false;
