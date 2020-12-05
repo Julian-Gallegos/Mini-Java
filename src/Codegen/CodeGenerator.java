@@ -5,14 +5,26 @@ import SemanticsAndTypes.*;
 import java.util.List;
 
 public class CodeGenerator {
+    public int doneCounter;
+    public int elseCounter;
     public int stackCounter;
     public int heapCounter;
     private boolean aligned;
 
     public CodeGenerator() {
+        doneCounter = 0;
+        elseCounter = 0;
         stackCounter = 0;
         heapCounter = 0;  // may not need?
         aligned = false;
+    }
+
+    public String genDoneLabel() {
+        return ".Done" + doneCounter++;
+    }
+
+    public String genElseLabel() {
+        return ".Else" + elseCounter++;
     }
 
     /* TODO: List of information we need for assembly code generation. Many of these could be done in the symbol table generation,

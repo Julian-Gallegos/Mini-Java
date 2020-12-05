@@ -17,10 +17,12 @@ public class CodegenVisitor implements Visitor {
     private String currentClass;
     private List<String> vars;
     private String currentMethod;
+    private int whileCounter;
 
     public CodegenVisitor(Program root, SymbolTable symbolTable, BuildVTableVisitor buildVTableVisitor) {
         this.symbolTable = symbolTable;
 	    this.buildVTableVisitor = buildVTableVisitor;
+        whileCounter = 0;
         codeGen = new CodeGenerator();
         // TODO: put in helper method
         // Set offsets for local variables at each method context.
@@ -196,23 +198,37 @@ public class CodegenVisitor implements Visitor {
     // Statement s1,s2;
     public void visit(If n) {
         codeGen.genComment("Entering if statement.");
+        //String elseLabel = codeGen.genElseLabel();
+        //String doneLabel = codeGen.genDoneLabel();
+
         n.e.accept(this);
-        n.s1.accept(this);
-        n.s2.accept(this);
+        codeGen.gen("cmpq $0, %rax");
+        codeGen.gen("je .Else" + codeGen.elseCounter);
+
+        n.s1.accept(this);  // run this if true
+        codeGen.gen("jmp .Done" + codeGen.doneCounter);
+
+        codeGen.genLabel(codeGen.genElseLabel());
+        n.s2.accept(this);  // else branch
+        codeGen.genLabel(codeGen.genDoneLabel());
     }
 
     // Exp e;
     // Statement s;
     public void visit(While n) {
-        codeGen.genComment("While loop");
+        codeGen.genComment("Entering while loop.");
+        String whileLabel = ".Test" + whileCounter;
 
-        // generate labels
+        codeGen.gen("jmp " + whileLabel);
+        codeGen.genLabel(".Test" + whileCounter++);
+        n.e.accept(this);  // test condition
+        codeGen.gen("cmpq $0, %rax");
+        codeGen.gen("je .Done" + codeGen.doneCounter);
 
-        // test condition
-        n.e.accept(this);
+        n.s.accept(this);  // body of while loop
+        codeGen.gen("jmp " + whileLabel);  // loop
 
-        // body
-        n.s.accept(this);
+        codeGen.genLabel(codeGen.genDoneLabel());
     }
 
     // Exp e;
@@ -256,7 +272,13 @@ public class CodegenVisitor implements Visitor {
     // Exp e1,e2;
     public void visit(And n) {
         n.e1.accept(this);
+        codeGen.gen("pushq %rax");
+
         n.e2.accept(this);
+        codeGen.gen("popq %rdx");
+        codeGen.gen("cmpq %rdx, %rax");
+        codeGen.gen("sete %al");
+        codeGen.gen("movzbq %al, %rax");
     }
 
     // Exp e1,e2;
@@ -267,6 +289,12 @@ public class CodegenVisitor implements Visitor {
         n.e2.accept(this);
         codeGen.gen("popq %rdx");
         codeGen.gen("cmpq %rdx, %rax");
+        codeGen.gen("setl %al");
+        codeGen.gen("movzbq %al, %rax");
+        //codeGen.gen("jge .Else" + codeGen.elseCounter);
+
+        //codeGen.gen("setge %rax");
+        //codeGen.gen();
         // gen(condjump targetLabel)
         //      - a variable assignment, or to some code block
         //      boolean a = 2 < 3 || if (2 < 3) { ... } else { ... }
@@ -438,8 +466,10 @@ public class CodegenVisitor implements Visitor {
 
     // Exp e;
     public void visit(Not n) {
-        //System.out.print("!");
         n.e.accept(this);
+        codeGen.gen("tesq %rax, %rax");
+        codeGen.gen("sete %al");
+        codeGen.gen("movzbq %al, %rax");
     }
 
     // String s;
