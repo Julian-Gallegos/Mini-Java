@@ -249,11 +249,13 @@ public class CodegenVisitor implements Visitor {
         codeGen.gen("je .Else" + codeGen.elseCounter);
 
         n.s1.accept(this);  // run this if true
-        codeGen.gen("jmp .Done" + codeGen.doneCounter);
+        int localDoneCounter = codeGen.doneCounter++;
+        codeGen.gen("jmp .Done" + localDoneCounter);
 
         codeGen.genLabel(codeGen.genElseLabel());
         n.s2.accept(this);  // else branch
-        codeGen.genLabel(codeGen.genDoneLabel());
+        codeGen.genLabel(".Done" + localDoneCounter);
+        //codeGen.genLabel(codeGen.genDoneLabel());
     }
 
     // Exp e;
@@ -266,12 +268,13 @@ public class CodegenVisitor implements Visitor {
         codeGen.genLabel(".Test" + whileCounter++);
         n.e.accept(this);  // test condition
         codeGen.gen("cmpq $0, %rax");
-        codeGen.gen("je .Done" + codeGen.doneCounter);
+        int localDoneCounter = codeGen.doneCounter++;
+        codeGen.gen("je .Done" + localDoneCounter);
 
         n.s.accept(this);  // body of while loop
         codeGen.gen("jmp " + whileLabel);  // loop
-
-        codeGen.genLabel(codeGen.genDoneLabel());
+        codeGen.genLabel(".Done" + localDoneCounter);
+        //codeGen.genLabel(codeGen.genDoneLabel());
     }
 
     // Exp e;
