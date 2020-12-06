@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 public class BuildVTableVisitor implements Visitor {
-    private Map<String, List<String>> vTables;
+    public Map<String, List<String>> vTables;
 
     private CodeGenerator codeGen;
     private SymbolTable symbolTable;

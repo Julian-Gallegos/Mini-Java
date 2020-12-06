@@ -2,10 +2,7 @@ package Codegen;
 
 import AST.*;
 import AST.Visitor.Visitor;
-import SemanticsAndTypes.ArgumentType;
-import SemanticsAndTypes.ClassScope;
-import SemanticsAndTypes.MethodScope;
-import SemanticsAndTypes.SymbolTable;
+import SemanticsAndTypes.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,8 +15,10 @@ public class CodegenVisitor implements Visitor {
     private List<String> vars;
     private String currentMethod;
     private int whileCounter;
+    private TypeTable typeTable;
 
-    public CodegenVisitor(Program root, SymbolTable symbolTable, BuildVTableVisitor buildVTableVisitor) {
+    public CodegenVisitor(Program root, SymbolTable symbolTable, BuildVTableVisitor buildVTableVisitor, TypeTable typeTable) {
+        this.typeTable = typeTable;
         this.symbolTable = symbolTable;
 	    this.buildVTableVisitor = buildVTableVisitor;
         whileCounter = 0;
@@ -113,8 +112,40 @@ public class CodegenVisitor implements Visitor {
         for ( int i = 0; i < n.vl.size(); i++ ) {
             n.vl.get(i).accept(this);
         }
+
+        buildVTableVisitor.vTables.put(codeGen.vtableHeader(n.i.s, n.j.s), new ArrayList<String>());
+        List<CodeGenPair> methodList = new ArrayList<>();
+        buildMethodList(methodList, n.i.s);
+
+        for (CodeGenPair pair : methodList) {
+            String key = codeGen.vtableHeader(n.i.s, n.j.s);
+            buildVTableVisitor.vTables.get(key)
+                    .add("\t.quad " + pair.className + "$" + pair.methodName);
+        }
+
         for ( int i = 0; i < n.ml.size(); i++ ) {
             n.ml.get(i).accept(this);
+        }
+    }
+
+    private void buildMethodList(List<CodeGenPair> lst, String cn) {
+        String extendedClass = typeTable.getType(cn);
+        if (extendedClass != null) {
+            // get to the root
+            buildMethodList(lst, extendedClass);
+        }
+        // add the classes within lst
+        for (String m : symbolTable.getClassScope(cn).orderedMethodList) {
+            boolean updated = false;
+            for (CodeGenPair p : lst) {
+                if (p.methodName.equals(m)) {
+                    p.className = cn;
+                    updated = true;
+                }
+            }
+            if (!updated) {
+                lst.add(new CodeGenPair(cn, m));
+            }
         }
     }
 

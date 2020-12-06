@@ -28,15 +28,15 @@ public class MiniJava {
                 // code generatio 
                 Program program = (Program) root.value;
                 GeneratorVisitor gv = new GeneratorVisitor(program);
-		        // ErrorCheckVisitor ecv = new ErrorCheckVisitor(program, gv.symbolTable, gv.typeTable);
-                //if (!ecv.errorsInProgram()) {
-                BuildVTableVisitor vTableVisitor = new BuildVTableVisitor(program, gv.symbolTable);
-                CodegenVisitor codegenVisitor = new CodegenVisitor(program, gv.symbolTable, vTableVisitor);
-		        System.exit(0);
-                //} else {
+		        ErrorCheckVisitor ecv = new ErrorCheckVisitor(program, gv.symbolTable, gv.typeTable);
+                if (!ecv.errorsInProgram()) {
+                    BuildVTableVisitor vTableVisitor = new BuildVTableVisitor(program, gv.symbolTable);
+                    CodegenVisitor codegenVisitor = new CodegenVisitor(program, gv.symbolTable, vTableVisitor, gv.typeTable);
+                    System.exit(0);
+                } else {
 		            // errors found in program
-		            //System.exit(1);
-                //}
+		            System.exit(1);
+                }
             }
             if (args.length > 2) {
                 System.exit(1); 
