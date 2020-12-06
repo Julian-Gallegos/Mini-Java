@@ -426,7 +426,10 @@ public class CodegenVisitor implements Visitor {
         //int objOffset = symbolTable.getClassOffset(((NewObject) n.e).i.s);
         // method offset depends on position in vtable, should just be calculated as 1,2,3,4...
         int methodOffset = -1;
-        String superClass = fieldFoundInSuper(((IdentifierExp)n.e).s, currentClass);
+        String superClass = null;
+        if (n.e instanceof IdentifierExp) {
+            superClass = fieldFoundInSuper(((IdentifierExp) n.e).s, currentClass);
+        }
         if (n.e instanceof NewObject) {
             methodOffset = symbolTable.getClassScope(((NewObject) n.e).i.s).getMethodOffset(n.i.s);
         } else if (n.e instanceof This) {
