@@ -655,6 +655,8 @@ public class ErrorCheckVisitor implements Visitor {
         String methodName = id.s;
         String extendedClass = findClassForMethodInScope(methodName, currentClass);
         MethodScope ms;
+        System.out.println("className " + className);
+        System.out.println("methodName " + methodName);
         if (extendedClass != null){
             System.out.println("error1");
             ms = symbolTable.getClassScope(extendedClass).getMethodScope(methodName);
