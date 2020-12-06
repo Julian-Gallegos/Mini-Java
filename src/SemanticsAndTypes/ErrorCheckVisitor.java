@@ -757,7 +757,7 @@ public class ErrorCheckVisitor implements Visitor {
         if (fieldFoundInSuper(id, className)) {
             return true;
         }
-        Thread.currentThread().getStackTrace();
+        new Exception().printStackTrace(System.out);
         System.out.println("Error: (Line " + e.line_number + ") variable " + id + " is not defined.");
         errorCounter++;
         return false;
