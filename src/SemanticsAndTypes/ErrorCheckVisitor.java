@@ -653,6 +653,7 @@ public class ErrorCheckVisitor implements Visitor {
                 }
             }
         }
+        System.out.println("Classname: " + className + " Methodname: " + methodName + " ID: " + id + " type: " + type);
         if (ms.methodVariables.containsKey(id) && isDerived(type, ms.methodVariables.get(id))) {
             return true;
         }
