@@ -32,6 +32,7 @@ public class GeneratorVisitor implements Visitor {
     // Statement s;
     public void visit(MainClass n) {
         symbolTable.putClass(n.i1.s, new ClassScope());
+        typeTable.putType(n.i1.s, null);
         n.i1.accept(this);   // class name
         n.s.accept(this);  // main method body
     }

@@ -19,7 +19,6 @@ public class ErrorCheckVisitor implements Visitor {
     private int errorCounter;
 
     public ErrorCheckVisitor(Program root, SymbolTable st, TypeTable tt) {
-        // TODO
         errorCounter = 0;
         symbolTable = st;
         typeTable = tt;
@@ -98,18 +97,6 @@ public class ErrorCheckVisitor implements Visitor {
             }
             n.ml.get(i).accept(this);
         }
-    }
-
-    // returns true if fieldname is found in a super class of any depth, false otherwise.
-    private boolean fieldFoundInSuper(String fieldName, String cn) {
-        String extendedClass = typeTable.getType(cn);
-        if (symbolTable.getClassScope(extendedClass).instanceVariableCount.containsKey(fieldName)) {
-            return true;
-        }
-        if (extendedClass != null) {
-            return fieldFoundInSuper(fieldName, extendedClass);
-        }
-        return false;
     }
 
     // Identifier i;
@@ -483,11 +470,107 @@ public class ErrorCheckVisitor implements Visitor {
         return false;
     }
 
+    // returns true if fieldname is found in a super class of any depth, false otherwise.
+    private boolean fieldFoundInSuper(String fieldName, String cn) {
+        String extendedClass = typeTable.getType(cn);
+        if (extendedClass != null) {
+            if (symbolTable.getClassScope(extendedClass).instanceVariableCount.containsKey(fieldName)) {
+                return true;
+            }
+            return fieldFoundInSuper(fieldName, extendedClass);
+        }
+        return false;
+    }
+
+    private String findClassForMethodInScope(String mn, String cn) {
+        String extendedClass = typeTable.getType(cn);
+        if (extendedClass != null) {
+            if (symbolTable.getClassScope(extendedClass).methodMap.containsKey(mn)) {
+                return extendedClass;
+            }
+            return findClassForMethodInScope(mn, extendedClass);
+        }
+        return null;
+    }
+
     private boolean isMethodDefined(String className, Identifier id, ExpList expList, String type) {
         String methodName = id.s;
         ClassScope cs = symbolTable.getClassScope(className);
+        String extendedClass = findClassForMethodInScope(methodName, className);
         if (cs.methodMap.containsKey(methodName)) {
             MethodScope ms = cs.getMethodScope(methodName);
+
+            if (!isDerived(type, ms.methodType)) {
+                errorCounter++;
+                System.out.println("Error (line " + id.line_number + ") method return type invalid");
+                return false;
+            }
+            if (ms.arguments.size() != expList.size()) {
+                errorCounter++;
+                System.out.println("Error (line " + id.line_number + ") method " + methodName + " expected " + ms.arguments.size() + " arguments. "
+                        + expList.size() + " arguments given");
+                return false;
+            }
+            for (int i = 0; i < ms.arguments.size(); i++) {
+                ArgumentType at = ms.arguments.get(i);
+                Exp exp = expList.get(i);
+                // string, integer, boolean
+                if (at.type.equals("integer")) {
+                    if (!isArithmeticExpression(exp)) {
+                        errorCounter++;
+                        System.out.println("Error (line " + exp.line_number + ") method argument number " +i+ " has type mismatch");
+                        return false;
+                    }
+                } else if (at.type.equals("boolean")) {
+                    if (!isBooleanExpression(exp)) {
+                        errorCounter++;
+                        System.out.println("Error (line " + exp.line_number + ") method argument number " +i+ " has type mismatch");
+                        return false;
+                    }
+                } else if (at.type.equals("intArray")) {
+                    if (exp instanceof Call) {
+                        if(!isCall(((Call) exp).e, ((Call) exp).i, ((Call) exp).el, "intArray")) {
+                            errorCounter++;
+                            System.out.println("Error (line " + exp.line_number + ") method argument number " +i+ " has type mismatch");
+                            return false;
+                        }
+                    } else if(exp instanceof IdentifierExp) {
+                        if (!isVariableDefined(className, methodName, exp, "intArray")) {
+                            errorCounter++;
+                            System.out.println("Error (line " + exp.line_number + ") method argument number " +i+ " has type mismatch");
+                            return false;
+                        }
+                    } else {
+                        errorCounter++;
+                        System.out.println("Error (line " + exp.line_number + ") method argument number " +i+ " has type mismatch");
+                        return false;
+                    }
+                } else if (typeTable.types.containsKey(at.type)) {
+                    // identifier case
+                    if (exp instanceof Call) {
+                        return isCall(((Call) exp).e, ((Call) exp).i, ((Call) exp).el, at.type);
+                    } else if(exp instanceof IdentifierExp) {
+                        String variableType = lookupTypeForID(((IdentifierExp) exp).s);
+                        if (!(variableType != null && isDerived(at.type, variableType))) {
+                            errorCounter++;
+                            System.out.println("Error (line " + exp.line_number + ") method argument number " +i+ " has type mismatch");
+                            return false;
+                        }
+                    } else if (exp instanceof This) {
+                        if(!isDerived(at.type, currentClass)) {
+                            errorCounter++;
+                            System.out.println("Error (line " + exp.line_number + ") method argument number " +i+ " has type mismatch");
+                            return false;
+                        }
+                    } else {
+                        errorCounter++;
+                        System.out.println("Error (line " + exp.line_number + ") method argument number " +i+ " has type mismatch");
+                        return false;
+                    }
+                }
+            }
+        } else if (extendedClass != null) {
+            MethodScope ms = symbolTable.getClassScope(extendedClass).getMethodScope(methodName);
 
             if (!isDerived(type, ms.methodType)) {
                 errorCounter++;
@@ -569,7 +652,17 @@ public class ErrorCheckVisitor implements Visitor {
     // assuming that it does exist in the SymbolTable
     private String getMethodType(String className, Identifier id, ExpList expList) {
         String methodName = id.s;
-        MethodScope ms = symbolTable.getClassScope(className).getMethodScope(methodName);
+        String extendedClass = findClassForMethodInScope(methodName, className);
+        MethodScope ms;
+        if (extendedClass != null){
+            ms = symbolTable.getClassScope(extendedClass).getMethodScope(methodName);
+        } else if (symbolTable.getClassScope(className).methodMap.containsKey(methodName)) {
+            ms = symbolTable.getClassScope(className).getMethodScope(methodName);
+        } else {
+            errorCounter++;
+            System.out.println("Error (line " + id.line_number + ") Method "+id.s+" not defined in scope");
+            return null;
+        }
 
         if (ms.arguments.size() != expList.size()) {
             errorCounter++;
@@ -660,7 +753,9 @@ public class ErrorCheckVisitor implements Visitor {
         if (cs.variableMap.containsKey(id) && isDerived(type, cs.variableMap.get(id))) {
             return true;
         }
-        //System.out.println("Class: "+className+" Method: "+methodName+" id: "+id+" compare with type: "+type);
+        if (fieldFoundInSuper(id, className)) {
+            return true;
+        }
         System.out.println("Error: (Line " + e.line_number + ") variable " + id + " is not defined.");
         errorCounter++;
         return false;
@@ -692,7 +787,7 @@ public class ErrorCheckVisitor implements Visitor {
     // Exp e;
     public void visit(Print n) {
         if (!isArithmeticExpression(n.e)) {
-            System.out.println("Error: (line " + n.e.line_number + ") print applied to non-int expression.");
+            System.out.println("Error: (line " + n.e.line_number + ") print applied to non-int expression or print expression invalid.");
             errorCounter++;
         }
 
