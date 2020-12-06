@@ -147,6 +147,7 @@ public class CodegenVisitor implements Visitor {
                 lst.add(new CodeGenPair(cn, m));
             }
         }
+        System.out.print(lst);
     }
 
     // Type t;

@@ -10,4 +10,8 @@ public class CodeGenPair {
         this.methodName = methodName;
     }
 
+    public String toString() {
+        return "[" + className + ", " + methodName + "]";
+    }
+
 }
