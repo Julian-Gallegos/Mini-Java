@@ -15,12 +15,13 @@ public class CodegenVisitor implements Visitor {
     private List<String> vars;
     private String currentMethod;
     private int whileCounter;
-    //private TypeTable typeTable;
+    private TypeTable typeTable;
 
-    public CodegenVisitor(Program root, SymbolTable symbolTable, BuildVTableVisitor buildVTableVisitor) {
+    public CodegenVisitor(Program root, SymbolTable symbolTable, BuildVTableVisitor buildVTableVisitor, TypeTable tt) {
         //this.typeTable = typeTable;
         this.symbolTable = symbolTable;
 	    this.buildVTableVisitor = buildVTableVisitor;
+	    this.typeTable = tt;
         whileCounter = 0;
         codeGen = new CodeGenerator();
         // TODO: put in helper method
@@ -419,30 +420,33 @@ public class CodegenVisitor implements Visitor {
         n.e.accept(this);
         //System.out.print(".");
         n.i.accept(this);
-        codeGen.gen("pushq %rdi"); // TODO swap back?
+        codeGen.gen("pushq %rdi"); //
         codeGen.gen("movq %rax, %rdi");
 
         //int objOffset = symbolTable.getClassOffset(((NewObject) n.e).i.s);
         // method offset depends on position in vtable, should just be calculated as 1,2,3,4...
         int methodOffset = -1;
+        String superClass = fieldFoundInSuper(((IdentifierExp)n.e).s, currentClass);
         if (n.e instanceof NewObject) {
             methodOffset = symbolTable.getClassScope(((NewObject) n.e).i.s).getMethodOffset(n.i.s);
         } else if (n.e instanceof This) {
             methodOffset = symbolTable.getClassScope(currentClass).getMethodOffset(n.i.s);
         } else if (n.e instanceof IdentifierExp) {
-	    // field of currentClass or variable of method
-	    String cn = null;
-	    // need to handle extended case soon.
-	    if (symbolTable.getClassScope(currentClass).variableMap.containsKey(((IdentifierExp)n.e).s)) {
-		    cn = symbolTable.getClassScope(currentClass).variableMap.get(((IdentifierExp)n.e).s);
-	    } else if (symbolTable.getClassScope(currentClass).getMethodScope(currentMethod).methodVariables.containsKey(((IdentifierExp)n.e).s)) {
-		    cn = symbolTable.getClassScope(currentClass).getMethodScope(currentMethod).methodVariables.get(((IdentifierExp)n.e).s);
-	    } else if (symbolTable.getClassScope(currentClass).getMethodScope(currentMethod).arguments.contains(new ArgumentType(((IdentifierExp)n.e).s, "n/a"))) {
-		    // parameter of currentMethod in currentClass
-		    cn = symbolTable.getClassScope(currentClass).getMethodScope(currentMethod).getTypeForName(((IdentifierExp)n.e).s);
-	    } else {
-		    // should never reach this.
-	    }
+            // field of currentClass or variable of method
+            String cn = null;
+            // need to handle extended case soon.
+            if (symbolTable.getClassScope(currentClass).variableMap.containsKey(((IdentifierExp)n.e).s)) {
+                cn = symbolTable.getClassScope(currentClass).variableMap.get(((IdentifierExp)n.e).s);
+            } else if (symbolTable.getClassScope(currentClass).getMethodScope(currentMethod).methodVariables.containsKey(((IdentifierExp)n.e).s)) {
+                cn = symbolTable.getClassScope(currentClass).getMethodScope(currentMethod).methodVariables.get(((IdentifierExp)n.e).s);
+            } else if (symbolTable.getClassScope(currentClass).getMethodScope(currentMethod).arguments.contains(new ArgumentType(((IdentifierExp)n.e).s, "n/a"))) {
+                // parameter of currentMethod in currentClass
+                cn = symbolTable.getClassScope(currentClass).getMethodScope(currentMethod).getTypeForName(((IdentifierExp)n.e).s);
+            } else if (superClass != null) {
+                cn = superClass;
+            } else {
+                // should never reach this
+            }
 	   
             methodOffset = symbolTable.getClassScope(cn).getMethodOffset(n.i.s);
         }
@@ -476,6 +480,17 @@ public class CodegenVisitor implements Visitor {
         //codeGen.gen("movq 0(%rdi), %rax");                         // load vtable address into %rax
         //codeGen.gen("call *" + methodOffset + "(%rax)");      // call function whose address is at
                                                                  // the specified offset in the vtable
+    }
+
+    private String fieldFoundInSuper(String fieldName, String cn) {
+        String extendedClass = typeTable.getType(cn);
+        if (extendedClass != null) {
+            if (symbolTable.getClassScope(extendedClass).instanceVariableCount.containsKey(fieldName)) {
+                return cn;
+            }
+            return fieldFoundInSuper(fieldName, extendedClass);
+        }
+        return null;
     }
 
     // int i;

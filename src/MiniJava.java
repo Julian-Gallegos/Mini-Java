@@ -31,7 +31,7 @@ public class MiniJava {
 		        ErrorCheckVisitor ecv = new ErrorCheckVisitor(program, gv.symbolTable, gv.typeTable);
                 if (!ecv.errorsInProgram()) {
                     BuildVTableVisitor vTableVisitor = new BuildVTableVisitor(program, gv.symbolTable, gv.typeTable);
-                    CodegenVisitor codegenVisitor = new CodegenVisitor(program, gv.symbolTable, vTableVisitor);
+                    CodegenVisitor codegenVisitor = new CodegenVisitor(program, gv.symbolTable, vTableVisitor, gv.typeTable);
                     System.exit(0);
                 } else {
 		            // errors found in program
