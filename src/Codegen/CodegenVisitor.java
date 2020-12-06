@@ -290,7 +290,6 @@ public class CodegenVisitor implements Visitor {
     // Identifier i;
     // Exp e;
     public void visit(Assign n) {
-        //TODO: currently just handles method variables, does not handle class instance variables.
         int offset;
         boolean isInstanceVariable = false;
         if (symbolTable.getClassScope(currentClass).getMethodScope(currentMethod).methodVariables.containsKey(n.i.s)) {
