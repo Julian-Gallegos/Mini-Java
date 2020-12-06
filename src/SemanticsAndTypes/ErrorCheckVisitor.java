@@ -235,7 +235,7 @@ public class ErrorCheckVisitor implements Visitor {
     }
 
     public void checkTypesMatch(Exp e, Type t) {
-        if (isArithmeticExpression(e)) {
+        if (isArithmeticExpression(e, false)) {
             if (!(t instanceof IntegerType)) {
                 System.out.println("Error: (line " + e.line_number + ") return types don't match.");
                 errorCounter++;
@@ -303,31 +303,31 @@ public class ErrorCheckVisitor implements Visitor {
         }
     }
 
-    private boolean isArithmeticExpression(Exp e) {
+    private boolean isArithmeticExpression(Exp e, boolean printError) {
         if (e instanceof Plus) {
-            return isArithmeticExpression(((Plus) e).e1)
-                    && isArithmeticExpression(((Plus) e).e2);
+            return isArithmeticExpression(((Plus) e).e1, true)
+                    && isArithmeticExpression(((Plus) e).e2, true);
         } else if (e instanceof Minus) {
-            return isArithmeticExpression(((Minus) e).e1)
-                    && isArithmeticExpression(((Minus) e).e2);
+            return isArithmeticExpression(((Minus) e).e1, true)
+                    && isArithmeticExpression(((Minus) e).e2, true);
         } else if (e instanceof Times) {
-            return isArithmeticExpression(((Times) e).e1)
-                    && isArithmeticExpression(((Times) e).e2);
+            return isArithmeticExpression(((Times) e).e1, true)
+                    && isArithmeticExpression(((Times) e).e2, true);
         } else if (e instanceof IntegerLiteral) {
             return true;
         } else if (e instanceof IdentifierExp) {
             return isVariableDefined(currentClass, currentMethod, e, "integer");
         } else if (e instanceof Call) {
-            return isCall(((Call) e).e, ((Call) e).i, ((Call) e).el, "integer", false);  // TAG
+            return isCall(((Call) e).e, ((Call) e).i, ((Call) e).el, "integer", printError);
         } else if (e instanceof ArrayLookup) {
             if (((ArrayLookup) e).e1 instanceof Call) {
                 Call c = ((Call) ((ArrayLookup) e).e1);
                 return isCall(c.e, c.i, c.el, "intArray", true)
-                        && isArithmeticExpression(((ArrayLookup) e).e2);
+                        && isArithmeticExpression(((ArrayLookup) e).e2, true);
             } else if (((ArrayLookup) e).e1 instanceof IdentifierExp) {
                 IdentifierExp ie = ((IdentifierExp) ((ArrayLookup) e).e1);
                 return isVariableDefined(currentClass, currentMethod, ie, "intArray")
-                        && isArithmeticExpression(((ArrayLookup) e).e2);
+                        && isArithmeticExpression(((ArrayLookup) e).e2, true);
             }
             return false;
         } else if (e instanceof ArrayLength) {
@@ -349,8 +349,8 @@ public class ErrorCheckVisitor implements Visitor {
             return isBooleanExpression(((And) e).e1)
                     && isBooleanExpression(((And) e).e2);
         } else if (e instanceof LessThan) {
-            return isArithmeticExpression(((LessThan) e).e1)
-                    && isArithmeticExpression(((LessThan) e).e2);
+            return isArithmeticExpression(((LessThan) e).e1, true)
+                    && isArithmeticExpression(((LessThan) e).e2, true);
         } else if (e instanceof Not) {
             return isBooleanExpression(((Not) e).e);
         } else if (e instanceof True) {
@@ -403,7 +403,7 @@ public class ErrorCheckVisitor implements Visitor {
             return getMethodType(((NewObject) exp).i.s, id, expList);
         } else if (exp instanceof NewArray) {
             // MiniJava array only has the .length field.
-            if (!isArithmeticExpression(((NewArray) exp).e) || !id.s.equals("length")) {
+            if (!isArithmeticExpression(((NewArray) exp).e, true) || !id.s.equals("length")) {
                 errorCounter++;
                 System.out.println("Error (line " + exp.line_number + ") Invalid Array.length call");
                 return null;
@@ -469,7 +469,7 @@ public class ErrorCheckVisitor implements Visitor {
             return isMethodDefined(((NewObject) exp).i.s, id, expList, type, printError);
         } else if (exp instanceof NewArray) {
             // MiniJava array only has the .length field.
-            return isArithmeticExpression(((NewArray) exp).e) && id.s.equals("length");
+            return isArithmeticExpression(((NewArray) exp).e, true) && id.s.equals("length");
         }
         return false;
     }
@@ -522,7 +522,7 @@ public class ErrorCheckVisitor implements Visitor {
                 Exp exp = expList.get(i);
                 // string, integer, boolean
                 if (at.type.equals("integer")) {
-                    if (!isArithmeticExpression(exp)) {
+                    if (!isArithmeticExpression(exp, true)) {
                         errorCounter++;
                         System.out.println("Error: (line " + exp.line_number + ") method argument number " + i + " has type mismatch");
                         return false;
@@ -596,7 +596,7 @@ public class ErrorCheckVisitor implements Visitor {
                 Exp exp = expList.get(i);
                 // string, integer, boolean
                 if (at.type.equals("integer")) {
-                    if (!isArithmeticExpression(exp)) {
+                    if (!isArithmeticExpression(exp, true)) {
                         errorCounter++;
                         System.out.println("Error (line " + exp.line_number + ") method argument number " + i + " has type mismatch");
                         return false;
@@ -684,7 +684,7 @@ public class ErrorCheckVisitor implements Visitor {
             ArgumentType at = ms.arguments.get(i);
             Exp exp = expList.get(i);
             if (at.type.equals("integer")) {
-                if (!isArithmeticExpression(exp)) {
+                if (!isArithmeticExpression(exp, true)) {
                     errorCounter++;
                     System.out.println("Error (line " + exp.line_number + ") method argument number " + i + " has type mismatch");
                     return null;
@@ -799,7 +799,7 @@ public class ErrorCheckVisitor implements Visitor {
 
     // Exp e;
     public void visit(Print n) {
-        if (!isArithmeticExpression(n.e)) {
+        if (!isArithmeticExpression(n.e, true)) {
             System.out.println("Error: (line " + n.e.line_number + ") print applied to non-int expression or print expression invalid.");
             errorCounter++;
         }
@@ -868,14 +868,14 @@ public class ErrorCheckVisitor implements Visitor {
         if (type.equals("boolean")) {
             return isBooleanExpression(exp);
         } else if (type.equals("integer")) {
-            return isArithmeticExpression(exp);
+            return isArithmeticExpression(exp, false);
         } else if (type.equals("intArray")) {
             if (exp instanceof Call) {
                 return isCall(((Call) exp).e, ((Call) exp).i, ((Call) exp).el, type, false);
             } else if (exp instanceof IdentifierExp) {
                 return isVariableDefined(currentClass, currentMethod, exp, type);
             } else if (exp instanceof NewArray) {
-                return isArithmeticExpression(((NewArray) exp).e);
+                return isArithmeticExpression(((NewArray) exp).e, false);
             }
             return false;
         } else if (typeTable.types.containsKey(type)) {
@@ -944,7 +944,7 @@ public class ErrorCheckVisitor implements Visitor {
     public void visit(ArrayAssign n) {
         n.i.accept(this);
         if (!(lookupTypeForID(n.i.s).equals("intArray")
-                && isArithmeticExpression(n.e1) && isArithmeticExpression(n.e2))) {
+                && isArithmeticExpression(n.e1, true) && isArithmeticExpression(n.e2, true))) {
             errorCounter++;
             System.out.println("Error: (line " + n.i.line_number + ") array assign failed");
         }
@@ -965,7 +965,7 @@ public class ErrorCheckVisitor implements Visitor {
     // Exp e1,e2;
     public void visit(LessThan n) {
         n.e1.accept(this);
-        if (!(isArithmeticExpression(n.e1) && isArithmeticExpression(n.e2))) {
+        if (!(isArithmeticExpression(n.e1, true) && isArithmeticExpression(n.e2, true))) {
             errorCounter++;
             System.out.println("Error: (line " + n.e1.line_number + ") types do not match");
         }
@@ -975,7 +975,7 @@ public class ErrorCheckVisitor implements Visitor {
     // Exp e1,e2;
     public void visit(Plus n) {
         n.e1.accept(this);
-        if (!(isArithmeticExpression(n.e1) && isArithmeticExpression(n.e2))) {
+        if (!(isArithmeticExpression(n.e1, true) && isArithmeticExpression(n.e2, true))) {
             errorCounter++;
             System.out.println("Error: (line " + n.e1.line_number + ") types do not match");
         }
@@ -985,7 +985,7 @@ public class ErrorCheckVisitor implements Visitor {
     // Exp e1,e2;
     public void visit(Minus n) {
         n.e1.accept(this);
-        if (!(isArithmeticExpression(n.e1) && isArithmeticExpression(n.e2))) {
+        if (!(isArithmeticExpression(n.e1, true) && isArithmeticExpression(n.e2, true))) {
             errorCounter++;
             System.out.println("Error: (line " + n.e1.line_number + ") types do not match");
         }
@@ -995,7 +995,7 @@ public class ErrorCheckVisitor implements Visitor {
     // Exp e1,e2;
     public void visit(Times n) {
         n.e1.accept(this);
-        if (!(isArithmeticExpression(n.e1) && isArithmeticExpression(n.e2))) {
+        if (!(isArithmeticExpression(n.e1, true) && isArithmeticExpression(n.e2, true))) {
             errorCounter++;
             System.out.println("Error: (line " + n.e1.line_number + ") types do not match");
         }
@@ -1009,7 +1009,7 @@ public class ErrorCheckVisitor implements Visitor {
             System.out.println("Error: (line " + n.e1.line_number + ") array described is not valid");
         }
         n.e1.accept(this);
-        if (!isArithmeticExpression(n.e2)) {
+        if (!isArithmeticExpression(n.e2, true)) {
             errorCounter++;
             System.out.println("Error: (line " + n.e2.line_number + ") expression in bracket is not of integer type");
         }
@@ -1038,11 +1038,11 @@ public class ErrorCheckVisitor implements Visitor {
         if (arr.e1 instanceof Call) {
             Call c = ((Call) arr.e1);
             return isCall(c.e, c.i, c.el, "intArray", true)
-                    && isArithmeticExpression(arr.e2);
+                    && isArithmeticExpression(arr.e2, true);
         } else if (arr.e1 instanceof IdentifierExp) {
             IdentifierExp ie = ((IdentifierExp) arr.e1);
             return isVariableDefined(currentClass, currentMethod, ie, "intArray")
-                    && isArithmeticExpression(arr.e2);
+                    && isArithmeticExpression(arr.e2, true);
         }
         return false;
     }
@@ -1078,7 +1078,7 @@ public class ErrorCheckVisitor implements Visitor {
 
     // Exp e;
     public void visit(NewArray n) {
-        if (!isArithmeticExpression(n.e)) {
+        if (!isArithmeticExpression(n.e, true)) {
             errorCounter++;
           System.out.println("Error: (line " + n.e.line_number + ") expression not of type integer.");
         }
