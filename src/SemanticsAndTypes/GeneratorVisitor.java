@@ -128,6 +128,8 @@ public class GeneratorVisitor implements Visitor {
         }
         for ( int i = 0; i < n.ml.size(); i++ ) {
             String method = n.ml.get(i).i.s;
+            symbolTable.getClassScope(n.i.s).orderedMethodList.add(method);
+
             String t = getType(n.ml.get(i).t);
             symbolTable.getClassScope(n.i.s).putMethod(method, new MethodScope(t));
             for (int j = 0; j < n.ml.get(i).fl.size(); j++) {
