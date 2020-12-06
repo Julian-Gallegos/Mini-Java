@@ -484,6 +484,7 @@ public class ErrorCheckVisitor implements Visitor {
 
     private String findClassForMethodInScope(String mn, String cn) {
         String extendedClass = typeTable.getType(cn);
+        System.out.println("extended class " + extendedClass);
         if (extendedClass != null) {
             if (symbolTable.getClassScope(extendedClass).methodMap.containsKey(mn)) {
                 return extendedClass;
@@ -655,16 +656,11 @@ public class ErrorCheckVisitor implements Visitor {
         String methodName = id.s;
         String extendedClass = findClassForMethodInScope(methodName, currentClass);
         MethodScope ms;
-        System.out.println("className " + className);
-        System.out.println("methodName " + methodName);
         if (extendedClass != null){
-            System.out.println("error1");
             ms = symbolTable.getClassScope(extendedClass).getMethodScope(methodName);
         } else if (symbolTable.getClassScope(className).methodMap.containsKey(methodName)) {
-            System.out.println("error2");
             ms = symbolTable.getClassScope(className).getMethodScope(methodName);
         } else {
-            System.out.println("error3");
             errorCounter++;
             System.out.println("Error (line " + id.line_number + ") Method "+id.s+" not defined in scope");
             return null;
