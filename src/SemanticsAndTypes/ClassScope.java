@@ -1,5 +1,7 @@
 package SemanticsAndTypes;
 
+import Codegen.CodeGenPair;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,25 +16,39 @@ public class ClassScope {
 
     public Map<String, Integer> fieldOffsets;  // instance variables
 
+    public List<CodeGenPair> vTableList;
+
     public ClassScope() {
         instanceVariableCount = new HashMap<>();
         methodMap = new HashMap<>();
         variableMap = new HashMap<>();
         orderedMethodList = new ArrayList<>();
         fieldOffsets = new HashMap<>();
+        vTableList = null;
     }
 
-    public int getMethodOffset(String methodName) {
+    public int getMethodOffset(String mn) {
         // class Foo
         // methods: X Y Z
-        int offset = 8;  // first 8 bytes of object consist of the vtable pointer
-        for (String m : orderedMethodList) {
-            if (m.equals(methodName)) {
-                return offset;
+        if (vTableList == null) {
+            int offset = 8;  // first 8 bytes of object consist of the vtable pointer
+            for (String m : orderedMethodList) {
+                if (m.equals(mn)) {
+                    return offset;
+                }
+                offset += 8;  // assuming each method is 8 bytes - indifferent of # of params
             }
-            offset += 8;  // assuming each method is 8 bytes - indifferent of # of params
+            return -1; // Some kind of error
+        } else {
+            int offset = 8;
+            for (CodeGenPair p : vTableList) {
+                if (p.methodName.equals(mn)) {
+                    return offset;
+                }
+                offset += 8;
+            }
+            return -1; // Some kind of error
         }
-        return -1;
     }
 
     // class size is assumed to be the sum of the field sizes.
