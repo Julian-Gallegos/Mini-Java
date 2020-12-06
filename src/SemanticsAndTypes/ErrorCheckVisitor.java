@@ -498,7 +498,7 @@ public class ErrorCheckVisitor implements Visitor {
     private boolean isMethodDefined(String className, Identifier id, ExpList expList, String type) {
         String methodName = id.s;
         ClassScope cs = symbolTable.getClassScope(className);
-        String extendedClass = findClassForMethodInScope(methodName, currentClass);
+        String extendedClass = findClassForMethodInScope(methodName, className);
         if (cs.methodMap.containsKey(methodName)) {
             MethodScope ms = cs.getMethodScope(methodName);
 
@@ -572,7 +572,6 @@ public class ErrorCheckVisitor implements Visitor {
                 }
             }
         } else if (extendedClass != null) {
-            //TODO: probably most of the stuff in the other branch
             MethodScope ms = symbolTable.getClassScope(extendedClass).getMethodScope(methodName);
 
             if (!isDerived(type, ms.methodType)) {
@@ -655,7 +654,7 @@ public class ErrorCheckVisitor implements Visitor {
     // assuming that it does exist in the SymbolTable
     private String getMethodType(String className, Identifier id, ExpList expList) {
         String methodName = id.s;
-        String extendedClass = findClassForMethodInScope(methodName, currentClass);
+        String extendedClass = findClassForMethodInScope(methodName, className);
         MethodScope ms;
         if (extendedClass != null){
             ms = symbolTable.getClassScope(extendedClass).getMethodScope(methodName);
