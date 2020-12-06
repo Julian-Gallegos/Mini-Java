@@ -479,11 +479,11 @@ public class CodegenVisitor implements Visitor {
     }
 
     public void visit(True n) {
-        codeGen.gen("movq 0 %rax");
+        codeGen.gen("movq $1, %rax");
     }
 
     public void visit(False n) {
-        codeGen.gen("movq 1 %rax");
+        codeGen.gen("movq $0, %rax");
     }
 
     // String s;
