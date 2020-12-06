@@ -96,9 +96,13 @@ public class CodeGenerator {
      */
     public void callocNewObject(int bytes) {
         // TODO
+        gen("pushq %rdi");
+        align();
         gen("movq $" + bytes + ", %rdi");
         calloc();
         heapCounter++;
+        undoAlign();
+        gen("popq %rdi");
     }
 
     public void genComment(String comment) {
