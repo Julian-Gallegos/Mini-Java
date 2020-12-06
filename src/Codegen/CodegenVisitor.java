@@ -15,10 +15,10 @@ public class CodegenVisitor implements Visitor {
     private List<String> vars;
     private String currentMethod;
     private int whileCounter;
-    private TypeTable typeTable;
+    //private TypeTable typeTable;
 
-    public CodegenVisitor(Program root, SymbolTable symbolTable, BuildVTableVisitor buildVTableVisitor, TypeTable typeTable) {
-        this.typeTable = typeTable;
+    public CodegenVisitor(Program root, SymbolTable symbolTable, BuildVTableVisitor buildVTableVisitor) {
+        //this.typeTable = typeTable;
         this.symbolTable = symbolTable;
 	    this.buildVTableVisitor = buildVTableVisitor;
         whileCounter = 0;
@@ -113,6 +113,7 @@ public class CodegenVisitor implements Visitor {
             n.vl.get(i).accept(this);
         }
 
+        /*
         buildVTableVisitor.vTables.put(codeGen.vtableHeader(n.i.s, n.j.s), new ArrayList<String>());
         List<CodeGenPair> methodList = new ArrayList<>();
         buildMethodList(methodList, n.i.s);
@@ -124,12 +125,13 @@ public class CodegenVisitor implements Visitor {
             buildVTableVisitor.vTables.get(key)
                     .add("\t.quad " + pair.className + "$" + pair.methodName);
         }
+        */
 
         for ( int i = 0; i < n.ml.size(); i++ ) {
             n.ml.get(i).accept(this);
         }
     }
-
+/*
     private void buildMethodList(List<CodeGenPair> lst, String cn) {
         String extendedClass = typeTable.getType(cn);
         if (extendedClass != null) {
@@ -155,7 +157,7 @@ public class CodegenVisitor implements Visitor {
         }
         //System.out.println("Debug: " + lst);
     }
-
+*/
     // Type t;
     // Identifier i;
     public void visit(VarDecl n) {

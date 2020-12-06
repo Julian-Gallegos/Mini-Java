@@ -4,6 +4,7 @@ import AST.*;
 import AST.Visitor.Visitor;
 import SemanticsAndTypes.ClassScope;
 import SemanticsAndTypes.SymbolTable;
+import SemanticsAndTypes.TypeTable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,13 +16,15 @@ public class BuildVTableVisitor implements Visitor {
 
     private CodeGenerator codeGen;
     private SymbolTable symbolTable;
+    private TypeTable typeTable;
 
     private String currentClass;
 
-    public BuildVTableVisitor(Program root, SymbolTable symbolTable) {
+    public BuildVTableVisitor(Program root, SymbolTable symbolTable, TypeTable tt) {
         vTables = new HashMap<String, List<String>>();
         this.symbolTable = symbolTable;
         codeGen = new CodeGenerator();
+        this.typeTable = tt;
         root.accept(this);
         currentClass = null;
     }
@@ -87,9 +90,46 @@ public class BuildVTableVisitor implements Visitor {
         for ( int i = 0; i < n.vl.size(); i++ ) {
             n.vl.get(i).accept(this);
         }
+
+        vTables.put(codeGen.vtableHeader(n.i.s, n.j.s), new ArrayList<String>());
+        List<CodeGenPair> methodList = new ArrayList<>();
+        buildMethodList(methodList, n.i.s);
+        symbolTable.getClassScope(currentClass).vTableList = methodList;
+
+        for (CodeGenPair pair : methodList) {
+            String key = codeGen.vtableHeader(n.i.s, n.j.s);
+            vTables.get(key).add("\t.quad " + pair.className + "$" + pair.methodName);
+        }
+
         for ( int i = 0; i < n.ml.size(); i++ ) {
             n.ml.get(i).accept(this);
         }
+    }
+
+    private void buildMethodList(List<CodeGenPair> lst, String cn) {
+        String extendedClass = typeTable.getType(cn);
+        if (extendedClass != null) {
+            // get to the root
+            buildMethodList(lst, extendedClass);
+        }
+        // add the classes within lst
+        for (String m : symbolTable.getClassScope(cn).orderedMethodList) {
+            boolean updated = false;
+
+            for (int i = 0; i < lst.size(); i++) {
+                CodeGenPair p = lst.get(i);
+                if (p.methodName.equals(m)) {
+                    lst.set(i, new CodeGenPair(cn, m));
+                    //p.className = cn;
+                    updated = true;
+                    //System.out.println("Debug: " + lst);
+                }
+            }
+            if (!updated) {
+                lst.add(new CodeGenPair(cn, m));
+            }
+        }
+        //System.out.println("Debug: " + lst);
     }
 
     // Type t;
