@@ -1,0 +1,6 @@
+we tried to get as much of the compiler as we could get done.
+we didn't have time to handle arrays. also, there was a considerable amount of time spent
+going back and fixing the false positive/negatives in our error and semantic checks. this
+time allocation partly explains why we didn't complete the entirety of the project, but we
+did get close. we did emphasis fixing our error&semantics bugs because we did not want to
+run assembly code on a file that has syntax errors.
