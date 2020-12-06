@@ -1,24 +1,38 @@
-class Test{
+class Test {
     public static void main(String[] a) {
-        System.out.println(new B().test());
+	System.out.println(new Two().getIt());
     }
 }
 
-class A {
-    int a;
-
-    public int test() {
-        return 2020;
+class One {
+    public int setTag() {
+	return 1;  
     }
 
-    public int getNum() {
-        return 10;
+    public int getTag() {
+	return 1; 
+    }
+
+    public int setIt(int it) {
+	return 1;  
+    }
+
+    public int getIt() {
+	return 2020; 
     }
 }
 
-class B extends A {
-    public int test() {
-        a = 100;
-        return a + this.getNum() + getNum();
+class Two extends One {
+
+    public int setTag() {
+	return 1; 
+    }
+    
+    public int getThat() {
+	return 1; 
+    }
+
+    public int resetIt() {
+	return 1;  
     }
 }

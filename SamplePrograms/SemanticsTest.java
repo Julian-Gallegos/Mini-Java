@@ -1,23 +1,16 @@
 class SemanticsTest {
     public static void main(String[] args) {
-        System.out.println(new Test().testMethod(3));
+	System.out.println(new C().hello());
     }
 }
 
-class C {
-    int a; 
-}
-
-class A extends C {
-    int b; 
-}
-
-class Test extends A {
-
-    public int testMethod(int a) {
-	int b;
-	b = 20; 
-	return b;
+class A {
+    public int hello() {
+	return 1010; 
     }
-    
 }
+
+class C extends A {
+
+}
+

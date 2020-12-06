@@ -116,7 +116,8 @@ public class CodegenVisitor implements Visitor {
         buildVTableVisitor.vTables.put(codeGen.vtableHeader(n.i.s, n.j.s), new ArrayList<String>());
         List<CodeGenPair> methodList = new ArrayList<>();
         buildMethodList(methodList, n.i.s);
-
+	//System.out.println("Two's Methods: " + symbolTable.getClassScope("Two").orderedMethodList); 
+	
         for (CodeGenPair pair : methodList) {
             String key = codeGen.vtableHeader(n.i.s, n.j.s);
             buildVTableVisitor.vTables.get(key)
@@ -137,17 +138,21 @@ public class CodegenVisitor implements Visitor {
         // add the classes within lst
         for (String m : symbolTable.getClassScope(cn).orderedMethodList) {
             boolean updated = false;
-            for (CodeGenPair p : lst) {
-                if (p.methodName.equals(m)) {
-                    p.className = cn;
-                    updated = true;
-                }
-            }
+	    
+	    for (int i = 0; i < lst.size(); i++) {
+		CodeGenPair p = lst.get(i);
+		if (p.methodName.equals(m)) {
+		    lst.set(i, new CodeGenPair(cn, m));
+		    //p.className = cn;
+		    updated = true; 
+		    //System.out.println("Debug: " + lst); 
+		}
+	    }
             if (!updated) {
                 lst.add(new CodeGenPair(cn, m));
             }
         }
-        System.out.print(lst);
+        //System.out.println("Debug: " + lst);
     }
 
     // Type t;
