@@ -277,9 +277,13 @@ public class CodegenVisitor implements Visitor {
     // Exp e;
     public void visit(Print n) {
         n.e.accept(this);
+        codeGen.gen("pushq %rdi");
         codeGen.gen("movq %rax, %rdi");
+        codeGen.align();
         // codeGen.align();
         codeGen.put();
+        codeGen.undoAlign();
+        codeGen.gen("popq %rdi");
 
     }
 
@@ -413,9 +417,8 @@ public class CodegenVisitor implements Visitor {
         n.e.accept(this);
         //System.out.print(".");
         n.i.accept(this);
+        codeGen.gen("pushq %rdi"); // TODO swap back?
         codeGen.gen("movq %rax, %rdi");
-        codeGen.gen("pushq %rdi");
-
 
         //int objOffset = symbolTable.getClassOffset(((NewObject) n.e).i.s);
         // method offset depends on position in vtable, should just be calculated as 1,2,3,4...
@@ -488,7 +491,6 @@ public class CodegenVisitor implements Visitor {
 
     // String s;
     public void visit(IdentifierExp n) {
-        //TODO: currently just handles method variables, does not handle class instance variables.
         int offset;
         boolean isInstanceVariable = false;
         if (symbolTable.getClassScope(currentClass).getMethodScope(currentMethod).methodVariables.containsKey(n.s)) {
