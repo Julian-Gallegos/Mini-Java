@@ -1,38 +1,17 @@
 class Test {
     public static void main(String[] a) {
-	System.out.println(new Two().getIt());
+	System.out.println(new Two().getIt(new One().hello()));
     }
 }
 
 class One {
-    public int setTag() {
-	return 1;  
-    }
-
-    public int getTag() {
-	return 1; 
-    }
-
-    public int setIt(int it) {
-	return 1;  
-    }
-
-    public int getIt() {
-	return 2020; 
+    public int hello() {
+	return 20; 
     }
 }
 
-class Two extends One {
-
-    public int setTag() {
-	return 1; 
-    }
-    
-    public int getThat() {
-	return 1; 
-    }
-
-    public int resetIt() {
-	return 1;  
+class Two {
+    public int getIt(int a) {
+	return a + 10; 
     }
 }
