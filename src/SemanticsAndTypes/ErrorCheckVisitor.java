@@ -484,7 +484,8 @@ public class ErrorCheckVisitor implements Visitor {
 
     private String findClassForMethodInScope(String mn, String cn) {
         String extendedClass = typeTable.getType(cn);
-        System.out.println("extended class " + extendedClass);
+        System.out.println(typeTable.types.toString());
+        System.out.println("Class "+cn+" extended class " + extendedClass);
         if (extendedClass != null) {
             if (symbolTable.getClassScope(extendedClass).methodMap.containsKey(mn)) {
                 return extendedClass;
